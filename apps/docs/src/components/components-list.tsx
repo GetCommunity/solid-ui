@@ -1,5 +1,4 @@
 import { For } from "solid-js"
-import { A } from "@solidjs/router"
 
 import { docsConfig } from "~/config/docs"
 
@@ -10,12 +9,12 @@ export function ComponentsList() {
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-x-8 lg:gap-x-16 lg:gap-y-6 xl:gap-x-20">
       <For each={components?.items}>
         {(item) => (
-          <A
+          <a
             class="inline-flex items-center gap-2 font-medium text-lg underline-offset-4 hover:underline md:text-base"
             href={item.href}
           >
             {item.title}
-          </A>
+          </a>
         )}
       </For>
     </div>

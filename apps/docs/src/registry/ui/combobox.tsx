@@ -1,8 +1,9 @@
 /**
  * TODO: update cn-classes for different stylesheet options
  */
-import type { Accessor, ComponentProps, JSX, ValidComponent } from "solid-js"
-import { createContext, For, mergeProps, Show, splitProps, useContext } from "solid-js"
+
+import { type Accessor, createContext, For, merge, omit, Show, useContext } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import * as ComboboxPrimitive from "@kobalte/core/combobox"
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
@@ -64,7 +65,7 @@ const useComboboxSelectionContext = () => {
 const Combobox = <O, OptGroup = never, T extends ValidComponent = "div">(
   rawProps: ComboboxProps<O, OptGroup, T>
 ) => {
-  const props = mergeProps(
+  const props = merge(
     {
       sameWidth: true,
       gutter: 8,
@@ -97,9 +98,9 @@ const Combobox = <O, OptGroup = never, T extends ValidComponent = "div">(
   }
 
   return (
-    <ComboboxRootContext.Provider value={context}>
+    <ComboboxRootContext value={context}>
       <ComboboxPrimitive.Root<O, OptGroup, T> {...props} />
-    </ComboboxRootContext.Provider>
+    </ComboboxRootContext>
   )
 }
 
@@ -113,7 +114,7 @@ type ComboboxControlProps<Option, T extends ValidComponent = "div"> = Polymorphi
 const ComboboxControl = <Option, T extends ValidComponent = "div">(
   props: ComboboxControlProps<Option, T>
 ) => {
-  const [local, others] = splitProps(props as ComboboxControlProps<Option, T>, ["class"])
+  const others = omit(props as ComboboxControlProps<Option, T>, "class")
   const controlProps = others as PolymorphicProps<
     T,
     ComboboxPrimitive.ComboboxControlProps<Option, T>
@@ -122,7 +123,7 @@ const ComboboxControl = <Option, T extends ValidComponent = "div">(
   return (
     <ComboboxPrimitive.Control<Option, T>
       {...controlProps}
-      class={cn("cn-combobox-control", local.class)}
+      class={cn("cn-combobox-control", props.class)}
       data-slot="combobox-control"
     />
   )
@@ -152,7 +153,7 @@ const ComboboxChip = (props: ComboboxChipProps) => {
     <Badge
       class={cn("cn-combobox-chip", props.class)}
       data-slot="combobox-chip"
-      onPointerDown={(event) => {
+      onPointerDown={(event: PointerEvent) => {
         event.preventDefault()
         event.stopPropagation()
       }}
@@ -179,12 +180,12 @@ type ComboboxChipsProps = ComponentProps<"div">
 const ComboboxChips = (props: ComboboxChipsProps) => {
   const rootContext = useComboboxRootContext()
   const selectionContext = useComboboxSelectionContext()
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <Show when={rootContext.isMultiple() && selectionContext.selectedOptions().length > 0}>
       <div
-        class={cn("flex min-w-0 max-w-full flex-wrap gap-1 p-1", local.class)}
+        class={cn("flex min-w-0 max-w-full flex-wrap gap-1 p-1", props.class)}
         data-slot="combobox-chips"
         {...others}
       >
@@ -198,14 +199,15 @@ const ComboboxChips = (props: ComboboxChipsProps) => {
 
 const ComboboxInput = <T extends ValidComponent = "input">(rawProps: ComboboxInputProps<T>) => {
   const rootContext = useComboboxRootContext()
-  const props = mergeProps({ showTrigger: true, showClear: false }, rawProps)
-  const [local, others] = splitProps(props as ComboboxInputProps<T>, [
+  const props = merge({ showTrigger: true, showClear: false }, rawProps)
+  const others = omit(
+    props as ComboboxInputProps<T>,
     "class",
     "showTrigger",
     "showClear",
     "children",
     "disabled"
-  ])
+  )
 
   return (
     <ComboboxPrimitive.Control<unknown, typeof InputGroup>
@@ -213,16 +215,16 @@ const ComboboxInput = <T extends ValidComponent = "input">(rawProps: ComboboxInp
       class={cn(
         "cn-combobox-input w-auto",
         rootContext.isMultiple() && "cn-combobox-chips h-auto flex-wrap items-stretch p-0",
-        local.class
+        props.class
       )}
       data-slot="combobox-control"
     >
       {(state) => (
-        <ComboboxSelectionContext.Provider
+        <ComboboxSelectionContext
           value={{
             ...state,
             isDisabled: () =>
-              local.disabled === true || rootContext.isDisabled() || rootContext.isReadOnly()
+              props.disabled === true || rootContext.isDisabled() || rootContext.isReadOnly()
           }}
         >
           <Show when={state.selectedOptions().length}>
@@ -232,21 +234,21 @@ const ComboboxInput = <T extends ValidComponent = "input">(rawProps: ComboboxInp
             class="cn-combobox-input-row flex min-w-32 flex-1 items-center"
             data-slot="combobox-input-row"
           >
-            {local.children}
+            {props.children}
             <ComboboxPrimitive.Input<typeof InputGroupInput>
               as={InputGroupInput}
               class="h-[calc((var(--spacing)*9)-2px)] w-auto min-w-0 flex-1 py-1.5 ring-inset"
               data-slot="combobox-input"
-              disabled={local.disabled}
+              disabled={props.disabled}
               {...others}
             />
             <InputGroupAddon align="inline-end" class="max-h-[34px] shrink-0">
-              <Show when={local.showTrigger}>
+              <Show when={props.showTrigger}>
                 <ComboboxPrimitive.Trigger
                   as={InputGroupButton}
                   class="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
                   data-slot="combobox-trigger"
-                  disabled={local.disabled}
+                  disabled={props.disabled}
                   size="icon-xs"
                   variant="ghost"
                 >
@@ -256,12 +258,12 @@ const ComboboxInput = <T extends ValidComponent = "input">(rawProps: ComboboxInp
                   />
                 </ComboboxPrimitive.Trigger>
               </Show>
-              <Show when={local.showClear && state.selectedOptions().length > 0}>
+              <Show when={props.showClear && state.selectedOptions().length > 0}>
                 <InputGroupButton
                   class="cn-combobox-clear"
                   data-slot="combobox-clear"
                   disabled={
-                    local.disabled === true || rootContext.isDisabled() || rootContext.isReadOnly()
+                    props.disabled === true || rootContext.isDisabled() || rootContext.isReadOnly()
                   }
                   onClick={() => state.clear()}
                   size="icon-xs"
@@ -272,7 +274,7 @@ const ComboboxInput = <T extends ValidComponent = "input">(rawProps: ComboboxInp
               </Show>
             </InputGroupAddon>
           </div>
-        </ComboboxSelectionContext.Provider>
+        </ComboboxSelectionContext>
       )}
     </ComboboxPrimitive.Control>
   )
@@ -289,21 +291,21 @@ type ComboboxTriggerProps<T extends ValidComponent = "button"> = PolymorphicProp
 const ComboboxTrigger = <T extends ValidComponent = "button">(
   rawProps: ComboboxTriggerProps<T>
 ) => {
-  const props = mergeProps({ size: "default" } as const, rawProps)
-  const [local, others] = splitProps(props as ComboboxTriggerProps, ["class", "children", "size"])
+  const props = merge({ size: "default" } as const, rawProps)
+  const others = omit(props as ComboboxTriggerProps, "class", "children", "size")
 
   return (
     <ComboboxPrimitive.Control>
       <ComboboxPrimitive.Trigger
         class={cn(
           "cn-combobox-trigger cn-select-trigger flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=combobox-value]:line-clamp-1 *:data-[slot=combobox-value]:flex *:data-[slot=combobox-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
-          local.class
+          props.class
         )}
-        data-size={local.size}
+        data-size={props.size}
         data-slot="combobox-trigger"
         {...others}
       >
-        {local.children}
+        {props.children}
         <ComboboxPrimitive.Icon
           as={ChevronsUpDown}
           class="cn-combobox-trigger-icon pointer-events-none"
@@ -320,13 +322,13 @@ type ComboboxContentProps<T extends ValidComponent = "div"> = PolymorphicProps<
   Pick<ComponentProps<T>, "class">
 
 const ComboboxContent = <T extends ValidComponent = "div">(props: ComboboxContentProps<T>) => {
-  const [local, others] = splitProps(props as ComboboxContentProps, ["class"])
+  const others = omit(props as ComboboxContentProps, "class")
   return (
     <ComboboxPrimitive.Portal>
       <ComboboxPrimitive.Content
         class={cn(
           "cn-combobox-content cn-menu-target relative isolate z-50 max-h-(--kb-popper-available-height) min-w-32 origin-(--kb-combobox-content-transform-origin) overflow-y-auto overflow-x-hidden",
-          local.class
+          props.class
         )}
         data-slot="combobox-content"
         {...others}
@@ -344,10 +346,10 @@ type ComboboxSectionProps<T extends ValidComponent = "li"> = PolymorphicProps<
   Pick<ComponentProps<T>, "class">
 
 const ComboboxSection = <T extends ValidComponent = "li">(props: ComboboxSectionProps<T>) => {
-  const [local, others] = splitProps(props as ComboboxSectionProps, ["class"])
+  const others = omit(props as ComboboxSectionProps, "class")
   return (
     <ComboboxPrimitive.Section
-      class={cn("cn-combobox-section", local.class)}
+      class={cn("cn-combobox-section", props.class)}
       data-slot="combobox-section"
       {...others}
     />
@@ -359,10 +361,10 @@ type ComboboxSectionLabelProps = ComponentProps<"span"> & {
 }
 
 const ComboboxSectionLabel = (props: ComboboxSectionLabelProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <span
-      class={cn("cn-combobox-section-label cn-select-label", local.class)}
+      class={cn("cn-combobox-section-label cn-select-label", props.class)}
       data-slot="combobox-section-label"
       {...others}
     />
@@ -378,18 +380,18 @@ type ComboboxItemProps<T extends ValidComponent = "li"> = PolymorphicProps<
   }
 
 const ComboboxItem = <T extends ValidComponent = "li">(props: ComboboxItemProps<T>) => {
-  const [local, others] = splitProps(props as ComboboxItemProps, ["class", "children"])
+  const others = omit(props as ComboboxItemProps, "class", "children")
   return (
     <ComboboxPrimitive.Item
       class={cn(
         "cn-combobox-item cn-select-item relative flex w-full cursor-default select-none items-center outline-hidden data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-        local.class
+        props.class
       )}
       data-slot="combobox-item"
       {...others}
     >
       <ComboboxPrimitive.ItemLabel class="cn-combobox-item-label cn-select-item-text shrink-0 whitespace-nowrap">
-        {local.children}
+        {props.children}
       </ComboboxPrimitive.ItemLabel>
       <ComboboxPrimitive.ItemIndicator
         as="span"
@@ -406,10 +408,10 @@ type ComboboxEmptyProps = ComponentProps<"div"> & {
 }
 
 const ComboboxEmpty = (props: ComboboxEmptyProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-combobox-empty py-6 text-center text-sm", local.class)}
+      class={cn("cn-combobox-empty py-6 text-center text-sm", props.class)}
       data-slot="combobox-empty"
       {...others}
     />
@@ -423,10 +425,10 @@ type ComboboxSeparatorProps<T extends ValidComponent = "hr"> = ComponentProps<T>
 const ComboboxSeparator = <T extends ValidComponent = "hr">(
   props: PolymorphicProps<T, ComboboxSeparatorProps<T>>
 ) => {
-  const [local, others] = splitProps(props as ComboboxSeparatorProps, ["class"])
+  const others = omit(props as ComboboxSeparatorProps, "class")
   return (
     <hr
-      class={cn("cn-combobox-separator cn-select-separator pointer-events-none", local.class)}
+      class={cn("cn-combobox-separator cn-select-separator pointer-events-none", props.class)}
       data-slot="combobox-separator"
       {...others}
     />

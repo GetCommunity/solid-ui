@@ -1,13 +1,14 @@
-import type { Accessor, ComponentProps, JSX, ValidComponent } from "solid-js"
 import {
+  type Accessor,
   createContext,
   createEffect,
   createSignal,
-  mergeProps,
+  merge,
+  omit,
   onCleanup,
-  splitProps,
   useContext
 } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import type { EmblaCarouselType, EmblaOptionsType, EmblaPluginType } from "embla-carousel"
@@ -58,22 +59,23 @@ type CarouselRootProps<T extends ValidComponent = "div"> = ComponentProps<T> &
 const Carousel = <T extends ValidComponent = "div">(
   rawProps: PolymorphicProps<T, CarouselRootProps<T>>
 ) => {
-  const props = mergeProps({ orientation: "horizontal" as const }, rawProps)
-  const [local, others] = splitProps(props as CarouselRootProps, [
+  const props = merge({ orientation: "horizontal" as const }, rawProps)
+  const others = omit(
+    props as CarouselRootProps,
     "class",
     "children",
     "opts",
     "plugins",
     "orientation",
     "setApi"
-  ])
+  )
 
   const [carouselRef, api] = createEmblaCarousel(
     () => ({
-      ...local.opts,
-      axis: local.orientation === "horizontal" ? "x" : "y"
+      ...props.opts,
+      axis: props.orientation === "horizontal" ? "x" : "y"
     }),
-    () => local.plugins ?? []
+    () => props.plugins ?? []
   )
 
   const [canScrollPrev, setCanScrollPrev] = createSignal(false)
@@ -102,11 +104,13 @@ const Carousel = <T extends ValidComponent = "div">(
     }
   }
 
-  createEffect(() => {
-    const emblaApi = api()
-    if (!emblaApi || !local.setApi) return
-    local.setApi(emblaApi)
-  })
+  createEffect(
+    () => api(),
+    (emblaApi) => {
+      if (!emblaApi || !props.setApi) return
+      props.setApi(emblaApi)
+    }
+  )
 
   createEffect(() => {
     const emblaApi = api()
@@ -122,12 +126,12 @@ const Carousel = <T extends ValidComponent = "div">(
   })
 
   return (
-    <CarouselContext.Provider
+    <CarouselContext
       value={{
         carouselRef,
         api,
-        opts: local.opts,
-        orientation: local.orientation || (local.opts?.axis === "y" ? "vertical" : "horizontal"),
+        opts: props.opts,
+        orientation: props.orientation || (props.opts?.axis === "y" ? "vertical" : "horizontal"),
         scrollPrev,
         scrollNext,
         canScrollPrev,
@@ -136,15 +140,15 @@ const Carousel = <T extends ValidComponent = "div">(
     >
       <div
         aria-roledescription="carousel"
-        class={cn("relative", local.class)}
+        class={cn("relative", props.class)}
         data-slot="carousel"
         onKeyDown={handleKeyDown}
         role="region"
         {...others}
       >
-        {local.children}
+        {props.children}
       </div>
-    </CarouselContext.Provider>
+    </CarouselContext>
   )
 }
 
@@ -155,13 +159,13 @@ type CarouselContentProps<T extends ValidComponent = "div"> = ComponentProps<T> 
 const CarouselContent = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, CarouselContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CarouselContentProps, ["class"])
+  const others = omit(props as CarouselContentProps, "class")
   const { carouselRef, orientation } = useCarousel()
 
   return (
     <div class="overflow-hidden" data-slot="carousel-content" ref={carouselRef}>
       <div
-        class={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", local.class)}
+        class={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", props.class)}
         {...others}
       />
     </div>
@@ -175,7 +179,7 @@ type CarouselItemProps<T extends ValidComponent = "div"> = ComponentProps<T> & {
 const CarouselItem = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, CarouselItemProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CarouselItemProps, ["class"])
+  const others = omit(props as CarouselItemProps, "class")
   const { orientation } = useCarousel()
 
   return (
@@ -184,7 +188,7 @@ const CarouselItem = <T extends ValidComponent = "div">(
       class={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
-        local.class
+        props.class
       )}
       data-slot="carousel-item"
       role="group"
@@ -200,8 +204,8 @@ type CarouselPreviousProps<T extends ValidComponent = "button"> = ButtonProps<T>
 const CarouselPrevious = <T extends ValidComponent = "button">(
   rawProps: PolymorphicProps<T, CarouselPreviousProps<T>>
 ) => {
-  const props = mergeProps({ variant: "outline" as const, size: "icon-sm" as const }, rawProps)
-  const [local, others] = splitProps(props as CarouselPreviousProps, ["class", "variant", "size"])
+  const props = merge({ variant: "outline" as const, size: "icon-sm" as const }, rawProps)
+  const others = omit(props as CarouselPreviousProps, "class", "variant", "size")
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -209,15 +213,15 @@ const CarouselPrevious = <T extends ValidComponent = "button">(
       class={cn(
         "cn-carousel-previous absolute touch-manipulation",
         orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        local.class
+          ? "-left-12 -translate-y-1/2 top-1/2"
+          : "-top-12 -translate-x-1/2 left-1/2 rotate-90",
+        props.class
       )}
       data-slot="carousel-previous"
       disabled={!canScrollPrev()}
       onClick={scrollPrev}
-      size={local.size}
-      variant={local.variant}
+      size={props.size}
+      variant={props.variant}
       {...others}
     >
       <ChevronLeft />
@@ -233,8 +237,8 @@ type CarouselNextProps<T extends ValidComponent = "button"> = ButtonProps<T> & {
 const CarouselNext = <T extends ValidComponent = "button">(
   rawProps: PolymorphicProps<T, CarouselNextProps<T>>
 ) => {
-  const props = mergeProps({ variant: "outline" as const, size: "icon-sm" as const }, rawProps)
-  const [local, others] = splitProps(props as CarouselNextProps, ["class", "variant", "size"])
+  const props = merge({ variant: "outline" as const, size: "icon-sm" as const }, rawProps)
+  const others = omit(props as CarouselNextProps, "class", "variant", "size")
   const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (
@@ -242,15 +246,15 @@ const CarouselNext = <T extends ValidComponent = "button">(
       class={cn(
         "cn-carousel-next absolute touch-manipulation",
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        local.class
+          ? "-right-12 -translate-y-1/2 top-1/2"
+          : "-bottom-12 -translate-x-1/2 left-1/2 rotate-90",
+        props.class
       )}
       data-slot="carousel-next"
       disabled={!canScrollNext()}
       onClick={scrollNext}
-      size={local.size}
-      variant={local.variant}
+      size={props.size}
+      variant={props.variant}
       {...others}
     >
       <ChevronRight />

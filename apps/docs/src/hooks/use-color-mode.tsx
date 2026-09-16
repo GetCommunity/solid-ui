@@ -24,34 +24,31 @@ export function ColorModeProvider(
     initialColorMode: ColorMode
   }>
 ) {
-  const [colorMode, setColorMode] = createSignal<ColorMode>(props.initialColorMode)
+  const [colorMode, setColorMode] = createSignal<ColorMode>(untrack(() => props.initialColorMode))
 
   const toggleColorMode = () => {
-    setColorMode((prev) => (prev === "dark" ? "light" : "dark"))
+    const nextColorMode = colorMode() === "dark" ? "light" : "dark"
+    setColorMode(nextColorMode)
 
     // Update the HTML element class
     const html = document.documentElement
     html.classList.remove("light", "dark")
-    html.classList.add(untrack(colorMode))
+    html.classList.add(nextColorMode)
 
     // Set the cookie
     // biome-ignore lint/suspicious/noDocumentCookie: <TODO: find a better way to do this>
-    document.cookie = `${COLOR_MODE_COOKIE_KEY}=${untrack(colorMode)}; path=/; max-age=31536000; SameSite=Lax`
+    document.cookie = `${COLOR_MODE_COOKIE_KEY}=${nextColorMode}; path=/; max-age=31536000; SameSite=Lax`
   }
 
   return (
-    <ColorModeContext.Provider value={{ colorMode, toggleColorMode, setColorMode }}>
+    <ColorModeContext value={{ colorMode, toggleColorMode, setColorMode }}>
       {props.children}
-    </ColorModeContext.Provider>
+    </ColorModeContext>
   )
 }
 
 export function useColorMode(): ColorModeContextValue {
-  const context = useContext(ColorModeContext)
-  if (context === undefined) {
-    throw new Error("useColorMode must be used within a ColorModeProvider")
-  }
-  return context
+  return useContext(ColorModeContext)
 }
 
 export const getClientColorMode = () =>

@@ -1,4 +1,5 @@
-import { type ComponentProps, splitProps, type ValidComponent } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import {
@@ -20,10 +21,10 @@ type RadioGroupProps<T extends ValidComponent = "div"> = PolymorphicProps<
   Pick<ComponentProps<T>, "class" | "children">
 
 const RadioGroup = <T extends ValidComponent = "div">(props: RadioGroupProps<T>) => {
-  const [local, others] = splitProps(props as RadioGroupProps, ["class"])
+  const others = omit(props as RadioGroupProps, "class")
   return (
     <RadioGroupRoot
-      class={cn("cn-radio-group w-full", local.class)}
+      class={cn("cn-radio-group w-full", props.class)}
       data-slot="radio-group"
       {...others}
     />
@@ -37,17 +38,17 @@ type RadioGroupItemProps<T extends ValidComponent = "div"> = PolymorphicProps<
   Pick<ComponentProps<T>, "class" | "children">
 
 const RadioGroupItem = <T extends ValidComponent = "div">(props: RadioGroupItemProps<T>) => {
-  const [local, others] = splitProps(props as RadioGroupItemProps, ["class", "id"])
+  const others = omit(props as RadioGroupItemProps, "class", "id")
   return (
     <Item
       class={cn(
-        "group/radio-group-item peer cn-radio-group-item relative aspect-square shrink-0 border outline-none after:absolute after:-inset-x-3 after:-inset-y-2 data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        local.class
+        "group/radio-group-item peer cn-radio-group-item after:-inset-x-3 after:-inset-y-2 relative aspect-square shrink-0 border outline-none after:absolute data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        props.class
       )}
       data-slot="radio-group-item"
       {...others}
     >
-      <ItemInput class="peer sr-only" data-slot="radio-group-item-input" id={local.id} />
+      <ItemInput class="peer sr-only" data-slot="radio-group-item-input" id={props.id} />
       <ItemIndicator class="cn-radio-group-indicator" data-slot="radio-group-indicator">
         <Circle class="cn-radio-group-indicator-icon" />
       </ItemIndicator>

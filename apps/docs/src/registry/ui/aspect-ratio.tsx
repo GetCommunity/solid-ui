@@ -1,20 +1,20 @@
-import type { Component, ComponentProps, JSX } from "solid-js"
-import { mergeProps, splitProps } from "solid-js"
+import { type Component, merge, omit } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import { cn } from "~/lib/utils"
 
 type AspectRatioProps = ComponentProps<"div"> & { ratio?: number }
 
 const AspectRatio: Component<AspectRatioProps> = (rawProps) => {
-  const props = mergeProps({ ratio: 1 / 1 }, rawProps)
-  const [local, others] = splitProps(props, ["class", "ratio"])
+  const props = merge({ ratio: 1 / 1 }, rawProps)
+  const others = omit(props, "class", "ratio")
   return (
     <div
-      class={cn("relative aspect-(--ratio)", local.class)}
+      class={cn("relative aspect-(--ratio)", props.class)}
       data-slot="aspect-ratio"
       style={
         {
-          "--ratio": local.ratio
+          "--ratio": props.ratio
         } as JSX.CSSProperties
       }
       {...others}

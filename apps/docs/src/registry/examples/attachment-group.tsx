@@ -1,6 +1,6 @@
 import type { Component } from "solid-js"
 import { For, Show } from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { Dynamic } from "@solidjs/web"
 
 import { FileCodeIcon, FileTextIcon, TableIcon, XIcon } from "lucide-solid"
 

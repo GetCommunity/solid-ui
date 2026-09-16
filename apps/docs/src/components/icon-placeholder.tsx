@@ -1,21 +1,16 @@
-import { type ComponentProps, lazy, Match, Show, Suspense, Switch, splitProps } from "solid-js"
+import { Loading, lazy, Match, omit, Show, Switch } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { useDesignSystem } from "~/components/design-system-provider"
 import type { IconLibraryName } from "~/registry/icon-libraries"
 
-const IconLucide = lazy(() =>
-  import("~/registry/icons/icon-lucide").then((mod) => ({
-    default: mod.IconLucide
-  }))
-)
+type SvgProps = JSX.IntrinsicElements["svg"]
 
-const IconTabler = lazy(() =>
-  import("~/registry/icons/icon-tabler").then((mod) => ({
-    default: mod.IconTabler
-  }))
-)
+const IconLucide = lazy(() => import("~/registry/icons/icon-lucide"), { export: "IconLucide" })
 
-function SquarePlaceholder(props: ComponentProps<"svg">) {
+const IconTabler = lazy(() => import("~/registry/icons/icon-tabler"), { export: "IconTabler" })
+
+function SquarePlaceholder(props: SvgProps) {
   return (
     <svg
       fill="none"
@@ -34,15 +29,15 @@ function SquarePlaceholder(props: ComponentProps<"svg">) {
 
 type IconPlaceholderProps = {
   [K in IconLibraryName]?: string
-} & ComponentProps<"svg">
+} & SvgProps
 
 export function IconPlaceholder(props: IconPlaceholderProps) {
-  const [local, svgProps] = splitProps(props, ["lucide", "tabler"])
+  const svgProps = omit(props, "lucide", "tabler")
   const { iconLibrary } = useDesignSystem()
 
   return (
-    <Suspense fallback={<SquarePlaceholder {...svgProps} />}>
-      <Show when={local[iconLibrary()]}>
+    <Loading fallback={<SquarePlaceholder {...svgProps} />}>
+      <Show when={props[iconLibrary()]}>
         {(iconName) => (
           <Switch>
             <Match when={iconLibrary() === "lucide"}>
@@ -54,6 +49,6 @@ export function IconPlaceholder(props: IconPlaceholderProps) {
           </Switch>
         )}
       </Show>
-    </Suspense>
+    </Loading>
   )
 }

@@ -1,5 +1,5 @@
-import type { ComponentProps, JSX } from "solid-js"
-import { For, splitProps } from "solid-js"
+import { For, omit } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import { CircleAlert, CircleCheck, CircleDashed } from "lucide-solid"
 
@@ -125,14 +125,14 @@ type ListItemProps = ComponentProps<"li"> & {
 }
 
 function ListItem(props: ListItemProps) {
-  const [local, others] = splitProps(props, ["children", "href", "title"])
+  const others = omit(props, "children", "href", "title")
 
   return (
     <li {...others}>
-      <NavigationMenuLink href={local.href}>
+      <NavigationMenuLink href={props.href}>
         <div class="flex flex-col gap-1 text-sm">
-          <div class="font-medium leading-none">{local.title}</div>
-          <div class="line-clamp-2 text-muted-foreground">{local.children}</div>
+          <div class="font-medium leading-none">{props.title}</div>
+          <div class="line-clamp-2 text-muted-foreground">{props.children}</div>
         </div>
       </NavigationMenuLink>
     </li>

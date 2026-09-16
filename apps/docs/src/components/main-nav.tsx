@@ -1,17 +1,17 @@
-import { type ComponentProps, For, splitProps } from "solid-js"
-import { A } from "@solidjs/router"
+import { For, omit } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { docsConfig } from "~/config/docs"
 import { cn } from "~/lib/utils"
 import { Button } from "~/registry/ui/button"
 
-export function MainNav(props: ComponentProps<"nav">) {
-  const [local, others] = splitProps(props, ["class"])
+export function MainNav(props: JSX.IntrinsicElements["nav"]) {
+  const others = omit(props, "class")
   return (
-    <nav class={cn("items-center", local.class)} {...others}>
+    <nav class={cn("items-center", props.class)} {...others}>
       <For each={docsConfig.mainNav}>
         {(item) => (
-          <Button as={A} href={item.href} size="sm" variant="ghost">
+          <Button as="a" href={item.href} size="sm" variant="ghost">
             {item.title}
           </Button>
         )}

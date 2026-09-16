@@ -1,5 +1,5 @@
 import { createMemo, type ParentProps, Show } from "solid-js"
-import { A, useLocation } from "@solidjs/router"
+import { useLocation } from "@solidjs/router"
 
 import { useFrontmatter } from "@kobalte/solidbase/client"
 
@@ -37,7 +37,7 @@ export function DocsLayout(props: ParentProps) {
                         <Show when={pagination()?.prev}>
                           {(prev) => (
                             <Button
-                              as={A}
+                              as="a"
                               class="extend-touch-target size-8 shadow-none md:size-7"
                               href={prev().href}
                               size="icon"
@@ -51,7 +51,7 @@ export function DocsLayout(props: ParentProps) {
                         <Show when={pagination()?.next}>
                           {(next) => (
                             <Button
-                              as={A}
+                              as="a"
                               class="extend-touch-target size-8 shadow-none md:size-7"
                               href={next().href}
                               size="icon"
@@ -108,7 +108,7 @@ export function DocsLayout(props: ParentProps) {
                   <Show when={pagination()?.prev}>
                     {(prev) => (
                       <Button
-                        as={A}
+                        as="a"
                         class="extend-touch-target shadow-none"
                         href={prev().href}
                         title={prev().title}
@@ -122,7 +122,7 @@ export function DocsLayout(props: ParentProps) {
                   <Show when={pagination()?.next}>
                     {(next) => (
                       <Button
-                        as={A}
+                        as="a"
                         class="extend-touch-target shadow-none"
                         href={next().href}
                         title={next().title}

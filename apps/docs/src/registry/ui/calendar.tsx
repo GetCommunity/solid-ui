@@ -1,4 +1,5 @@
-import { type ComponentProps, Index, type JSX, mergeProps, Show, splitProps } from "solid-js"
+import { For, merge, omit, Show } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import Calendar from "@corvu/calendar"
 import { getWeek } from "date-fns"
@@ -138,7 +139,7 @@ const MONTHS = [
 const CalendarComponent = (props: CalendarProps) => {
   const currentYear = new Date().getFullYear()
 
-  const mergedProps = mergeProps(
+  const mergedProps = merge(
     {
       mode: "single" as const,
       showOutsideDays: true,
@@ -153,7 +154,8 @@ const CalendarComponent = (props: CalendarProps) => {
     props
   )
 
-  const [local, others] = splitProps(mergedProps, [
+  const others = omit(
+    mergedProps,
     "class",
     "mode",
     "value",
@@ -173,7 +175,7 @@ const CalendarComponent = (props: CalendarProps) => {
     "monthYearSelection",
     "startYear",
     "endYear"
-  ])
+  )
 
   const formatMonth = (date: Date) => {
     return date.toLocaleString("default", { month: "long", year: "numeric" })
@@ -185,26 +187,26 @@ const CalendarComponent = (props: CalendarProps) => {
 
   // Generate years array for dropdown
   const years = () =>
-    Array.from({ length: local.endYear - local.startYear + 1 }, (_, i) => {
-      const year = local.startYear + i
+    Array.from({ length: mergedProps.endYear - mergedProps.startYear + 1 }, (_, i) => {
+      const year = mergedProps.startYear + i
       return { label: year.toString(), value: year }
     }).reverse()
 
   return (
     // @ts-expect-error - Calendar component is not typed correctly
     <Calendar
-      disabled={(date: Date) => local.disabled?.(date) || local.booked?.(date) || false}
-      disableOutsideDays={!local.showOutsideDays}
-      fixedWeeks={local.fixedWeeks}
-      initialMonth={local.defaultMonth}
-      initialValue={local.defaultValue as Date | null}
-      mode={local.mode}
-      month={local.month}
-      numberOfMonths={local.numberOfMonths}
-      onMonthChange={local.onMonthChange}
-      onValueChange={local.onValueChange as (value: Date | null) => void}
-      startOfWeek={local.weekStartsOn}
-      value={local.value as Date | null}
+      disabled={(date: Date) => props.disabled?.(date) || props.booked?.(date) || false}
+      disableOutsideDays={!props.showOutsideDays}
+      fixedWeeks={props.fixedWeeks}
+      initialMonth={props.defaultMonth}
+      initialValue={props.defaultValue as Date | null}
+      mode={mergedProps.mode}
+      month={props.month}
+      numberOfMonths={props.numberOfMonths}
+      onMonthChange={props.onMonthChange}
+      onValueChange={props.onValueChange as (value: Date | null) => void}
+      startOfWeek={props.weekStartsOn}
+      value={props.value as Date | null}
     >
       {/* @ts-expect-error - Calendar component is not typed correctly */}
       {(calendarProps) => (
@@ -212,13 +214,13 @@ const CalendarComponent = (props: CalendarProps) => {
           class={cn(
             "group/calendar cn-calendar w-fit bg-popover p-3",
             "in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
-            local.class
+            props.class
           )}
           data-slot="calendar"
           {...others}
         >
           <div class="flex flex-col gap-4 md:flex-row">
-            <Index each={calendarProps.months}>
+            <For each={calendarProps.months} keyed={false}>
               {(monthData, index) => (
                 <div class="flex w-full flex-col gap-4" data-slot="calendar-month">
                   {/* Navigation and Header */}
@@ -250,7 +252,7 @@ const CalendarComponent = (props: CalendarProps) => {
                           {formatMonth(monthData().month)}
                         </h2>
                       }
-                      when={local.monthYearSelection}
+                      when={props.monthYearSelection}
                     >
                       <div class="flex flex-1 items-center justify-center gap-0">
                         <Select<(typeof MONTHS)[number]>
@@ -301,7 +303,7 @@ const CalendarComponent = (props: CalendarProps) => {
                               {(state) => state.selectedOption().label}
                             </SelectValue>
                           </SelectTrigger>
-                          <SelectContent class="max-h-[300px]" />
+                          <SelectContent class="max-h-75" />
                         </Select>
                       </div>
                     </Show>
@@ -324,7 +326,7 @@ const CalendarComponent = (props: CalendarProps) => {
                     <thead data-slot="calendar-weekdays">
                       <tr class="flex">
                         {/* Week number header */}
-                        <Show when={local.weekNumbers}>
+                        <Show when={props.weekNumbers}>
                           <th
                             class="w-8 flex-none select-none rounded-(--cell-radius) font-normal text-[0.8rem] text-muted-foreground"
                             data-slot="calendar-week-number-header"
@@ -332,7 +334,7 @@ const CalendarComponent = (props: CalendarProps) => {
                             #
                           </th>
                         </Show>
-                        <Index each={calendarProps.weekdays}>
+                        <For each={calendarProps.weekdays} keyed={false}>
                           {(weekday) => (
                             <Calendar.HeadCell
                               class="flex-1 select-none rounded-(--cell-radius) font-normal text-[0.8rem] text-muted-foreground"
@@ -341,15 +343,15 @@ const CalendarComponent = (props: CalendarProps) => {
                               {formatWeekday(weekday())}
                             </Calendar.HeadCell>
                           )}
-                        </Index>
+                        </For>
                       </tr>
                     </thead>
                     <tbody data-slot="calendar-weeks">
-                      <Index each={monthData().weeks}>
+                      <For each={monthData().weeks} keyed={false}>
                         {(week) => (
                           <tr class="mt-2 flex w-full" data-slot="calendar-week">
                             {/* Week number cell */}
-                            <Show when={local.weekNumbers}>
+                            <Show when={props.weekNumbers}>
                               <td
                                 class="flex w-8 flex-none select-none items-center justify-center font-normal text-[0.75rem] text-muted-foreground"
                                 data-slot="calendar-week-number"
@@ -357,31 +359,29 @@ const CalendarComponent = (props: CalendarProps) => {
                                 {getWeekNumber(week())}
                               </td>
                             </Show>
-                            <Index each={week()}>
+                            <For each={week()} keyed={false}>
                               {(day) => (
-                                <Show fallback={<td class="flex-1 p-0" />} when={day()}>
-                                  {(d) => (
-                                    <CalendarDay
-                                      booked={local.booked}
-                                      customCell={local.customCell}
-                                      day={d()}
-                                      disabled={local.disabled}
-                                      mode={local.mode}
-                                      month={monthData().month}
-                                      value={calendarProps.value}
-                                    />
-                                  )}
+                                <Show fallback={<td class="flex-1 p-0" />} when={day}>
+                                  <CalendarDay
+                                    booked={props.booked}
+                                    customCell={props.customCell}
+                                    day={day()}
+                                    disabled={props.disabled}
+                                    mode={mergedProps.mode}
+                                    month={monthData().month}
+                                    value={calendarProps.value}
+                                  />
                                 </Show>
                               )}
-                            </Index>
+                            </For>
                           </tr>
                         )}
-                      </Index>
+                      </For>
                     </tbody>
                   </Calendar.Table>
                 </div>
               )}
-            </Index>
+            </For>
           </div>
         </div>
       )}

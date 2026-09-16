@@ -40,9 +40,9 @@ export function ColorModeProvider(
   }
 
   return (
-    <ColorModeContext.Provider value={{ colorMode, toggleColorMode, setColorMode }}>
+    <ColorModeContext value={{ colorMode, toggleColorMode, setColorMode }}>
       {props.children}
-    </ColorModeContext.Provider>
+    </ColorModeContext>
   )
 }
 

@@ -1,32 +1,24 @@
-import { defineConfig } from "@solidjs/start/config"
+import solidPlugin from "@solidjs/vite-plugin"
 
-import { createWithSolidBase, defineTheme } from "@kobalte/solidbase/config"
+import { createSolidBase, defineTheme } from "@kobalte/solidbase/config"
 import defaultTheme from "@kobalte/solidbase/default-theme"
 import tailwindcss from "@tailwindcss/vite"
+import { nitro } from "nitro/vite"
+import { defineConfig } from "vite"
 
+const baseThemePath = import.meta.resolve("./src/solidbase-theme")
 const theme = defineTheme({
-  componentsPath: import.meta.resolve("./src/solidbase-theme"),
+  componentsPath: baseThemePath,
   extends: defaultTheme
 })
+const solidBase = createSolidBase(theme)
 
-export default defineConfig(
-  createWithSolidBase(theme)(
-    {
-      ssr: true,
-      server: {
-        preset: "vercel",
-        prerender: {
-          crawlLinks: true
-        }
-      },
-      vite: {
-        plugins: [tailwindcss()],
-        server: {
-          port: parseInt(process.env.FRONTEND_PORT || "5173", 10)
-        }
-      }
-    },
-    {
+export default defineConfig({
+  resolve: {
+    tsconfigPaths: true
+  },
+  plugins: [
+    solidBase.plugin({
       markdown: {
         expressiveCode: {
           themes: ["github-dark-default", "github-light-default"]
@@ -90,6 +82,18 @@ export default defineConfig(
           }
         }
       }
+    }),
+    solidPlugin(solidBase.startConfig()),
+    tailwindcss(),
+    nitro()
+  ],
+  server: {
+    port: Number.parseInt(process.env.FRONTEND_PORT || "3000", 10)
+  },
+  nitro: {
+    preset: "node",
+    prerender: {
+      crawlLinks: true
     }
-  )
-)
+  }
+})

@@ -1,5 +1,5 @@
-import type { Component, ComponentProps, JSX, ValidComponent } from "solid-js"
-import { mergeProps, Show, splitProps } from "solid-js"
+import { type Component, merge, omit, Show } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import * as DialogPrimitive from "@kobalte/core/dialog"
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
@@ -35,10 +35,10 @@ type DialogOverlayProps<T extends ValidComponent = "div"> =
 const DialogOverlay = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, DialogOverlayProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DialogOverlayProps, ["class"])
+  const others = omit(props as DialogOverlayProps, "class")
   return (
     <DialogPrimitive.Overlay
-      class={cn("cn-dialog-overlay fixed inset-0 isolate z-50", local.class)}
+      class={cn("cn-dialog-overlay fixed inset-0 isolate z-50", props.class)}
       data-slot="dialog-overlay"
       {...others}
     />
@@ -55,25 +55,21 @@ type DialogContentProps<T extends ValidComponent = "div"> =
 const DialogContent = <T extends ValidComponent = "div">(
   rawProps: PolymorphicProps<T, DialogContentProps<T>>
 ) => {
-  const props = mergeProps({ showCloseButton: true }, rawProps)
-  const [local, others] = splitProps(props as DialogContentProps, [
-    "class",
-    "children",
-    "showCloseButton"
-  ])
+  const props = merge({ showCloseButton: true }, rawProps)
+  const others = omit(props as DialogContentProps, "class", "children", "showCloseButton")
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         class={cn(
-          "cn-dialog-content fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2",
-          local.class
+          "cn-dialog-content -translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 w-full",
+          props.class
         )}
         data-slot="dialog-content"
         {...others}
       >
-        {local.children}
-        <Show when={local.showCloseButton}>
+        {props.children}
+        <Show when={props.showCloseButton}>
           <DialogPrimitive.CloseButton
             as={Button}
             class="cn-dialog-close"
@@ -91,10 +87,10 @@ const DialogContent = <T extends ValidComponent = "div">(
 }
 
 const DialogHeader: Component<ComponentProps<"div">> = (props) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-dialog-header flex flex-col", local.class)}
+      class={cn("cn-dialog-header flex flex-col", props.class)}
       data-slot="dialog-header"
       {...others}
     />
@@ -102,12 +98,12 @@ const DialogHeader: Component<ComponentProps<"div">> = (props) => {
 }
 
 const DialogFooter: Component<ComponentProps<"div">> = (props) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-dialog-footer flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        local.class
+        props.class
       )}
       data-slot="dialog-footer"
       {...others}
@@ -122,10 +118,10 @@ type DialogTitleProps<T extends ValidComponent = "h2"> = DialogPrimitive.DialogT
 const DialogTitle = <T extends ValidComponent = "h2">(
   props: PolymorphicProps<T, DialogTitleProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DialogTitleProps, ["class"])
+  const others = omit(props as DialogTitleProps, "class")
   return (
     <DialogPrimitive.Title
-      class={cn("cn-dialog-title", local.class)}
+      class={cn("cn-dialog-title", props.class)}
       data-slot="dialog-title"
       {...others}
     />
@@ -140,10 +136,10 @@ type DialogDescriptionProps<T extends ValidComponent = "p"> =
 const DialogDescription = <T extends ValidComponent = "p">(
   props: PolymorphicProps<T, DialogDescriptionProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DialogDescriptionProps, ["class"])
+  const others = omit(props as DialogDescriptionProps, "class")
   return (
     <DialogPrimitive.Description
-      class={cn("cn-dialog-description", local.class)}
+      class={cn("cn-dialog-description", props.class)}
       data-slot="dialog-description"
       {...others}
     />

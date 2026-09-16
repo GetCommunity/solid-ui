@@ -1,5 +1,5 @@
-import type { ComponentProps } from "solid-js"
-import { createSignal, Show, splitProps } from "solid-js"
+import { createSignal, omit, Show } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import { cn } from "~/lib/utils"
 import { useIsMobile } from "~/registry/hooks/use-mobile"
@@ -73,10 +73,10 @@ export default function DrawerDialog() {
 }
 
 function ProfileForm(props: ComponentProps<"form">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
-    <form class={cn("grid items-start gap-6", local.class)} {...others}>
+    <form class={cn("grid items-start gap-6", props.class)} {...others}>
       <div class="grid gap-3">
         <Label for="email">Email</Label>
         <Input id="email" type="email" value="shadcn@example.com" />

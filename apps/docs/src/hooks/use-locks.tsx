@@ -1,4 +1,4 @@
-import { createContext, createMemo, createSignal, type ParentProps, useContext } from "solid-js"
+import { createContext, createSignal, type ParentProps, useContext } from "solid-js"
 
 export type LockableParam = "style" | "iconLibrary"
 
@@ -29,21 +29,15 @@ export function LocksProvider(props: ParentProps) {
     })
   }
 
-  const value = createMemo<LocksContextValue>(() => ({
+  const value: LocksContextValue = {
     locks,
     isLocked,
     toggleLock
-  }))
+  }
 
-  return <LocksContext.Provider value={value()}>{props.children}</LocksContext.Provider>
+  return <LocksContext value={value}>{props.children}</LocksContext>
 }
 
 export function useLocks() {
-  const context = useContext(LocksContext)
-
-  if (context === undefined) {
-    throw new Error("[SolidUI]: `useLocks` must be used within a `LocksProvider`")
-  }
-
-  return context
+  return useContext(LocksContext)
 }

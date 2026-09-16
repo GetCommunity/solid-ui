@@ -2,5 +2,34 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
-  '@parcel/watcher': true
+  "@parcel/watcher": true
   esbuild: true
+minimumReleaseAgeExclude:
+  - "@corvu/calendar"
+  - "@corvu/drawer"
+  - "@corvu/otp-field"
+  - "@corvu/resizable"
+  - "@kobalte/core"
+  - "@kobalte/solidbase"
+  - "@solid-primitives/storage"
+  - "@solidjs/meta"
+  - "@solidjs/router"
+  - "@tabler/icons-solidjs"
+  - "cmdk-solid"
+  - "embla-carousel"
+  - "embla-carousel-autoplay"
+  - "embla-carousel-solid"
+  - "lucide-solid"
+  - "solid-js"
+  - "solid-recharts"
+  - "solid-sonner"
+  - "@solidjs/vite-plugin"
+  - '@solidjs/babel-plugin@2.0.0-rc.6'
+  - '@solidjs/compiler-darwin-arm64@2.0.0-rc.6'
+  - '@solidjs/compiler-darwin-x64@2.0.0-rc.6'
+  - '@solidjs/compiler-linux-arm64-gnu@2.0.0-rc.6'
+  - '@solidjs/compiler-linux-x64-gnu@2.0.0-rc.6'
+  - '@solidjs/compiler-wasm32-wasi@2.0.0-rc.6'
+  - '@solidjs/compiler-win32-x64-msvc@2.0.0-rc.6'
+  - '@solidjs/compiler@2.0.0-rc.6'
+  - '@solidjs/signals@2.0.0-rc.6'

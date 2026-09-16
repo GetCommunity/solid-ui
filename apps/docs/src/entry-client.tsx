@@ -1,5 +1,7 @@
 // @refresh reload
-import { mount, StartClient } from "@solidjs/start/client"
+import { hydrate } from "@solidjs/web"
+
+import App from "~/app"
 
 // biome-ignore lint/style/noNonNullAssertion: it's just how it works <3
-mount(() => <StartClient />, document.getElementById("app")!)
+hydrate(() => <App />, document.getElementById("app")!)

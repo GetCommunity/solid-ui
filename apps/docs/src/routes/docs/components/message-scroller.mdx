@@ -38,7 +38,7 @@ Streaming changes a simple message list into a scroll-state problem. New content
 
 ## MessageScroller
 
-`MessageScroller` is a chat transcript scroller built for these behaviors. `MessageScroller.Provider` owns the scroll state and transcript-row behavior: opening position, streamed output, new-turn anchoring, prepended history, visibility, and scroll controls. `MessageScroller.Root` is the styled frame that renders inside it.
+`MessageScroller` is a chat transcript scroller built for these behaviors. `MessageScroller` owns the scroll state and transcript-row behavior: opening position, streamed output, new-turn anchoring, prepended history, visibility, and scroll controls. `MessageScroller.Root` is the styled frame that renders inside it.
 
 `MessageScroller` is scoped to the scroll viewport. It does not own messages, AI state, transport, persistence, branching, or model state. Your product code stays focused on composing messages, markers, tools, attachments, and prompt inputs.
 
@@ -74,7 +74,7 @@ import { MessageScroller } from "~/components/blocks/message-scroller";
 ```
 
 ```tsx showLineNumbers
-<MessageScroller.Provider autoScroll>
+<MessageScroller autoScroll>
   <MessageScroller.Root>
     <MessageScroller.Viewport>
       <MessageScroller.Content>
@@ -92,25 +92,25 @@ import { MessageScroller } from "~/components/blocks/message-scroller";
     </MessageScroller.Viewport>
     <MessageScroller.Button />
   </MessageScroller.Root>
-</MessageScroller.Provider>
+</MessageScroller>
 ```
 
 `MessageScroller.Root` fills its parent, so place it in a height-constrained layout.
 
 ```tsx
 <div class="flex h-screen flex-col">
-  <MessageScroller.Provider>
+  <MessageScroller>
     <MessageScroller.Root class="flex-1">
       {/* transcript */}
     </MessageScroller.Root>
-  </MessageScroller.Provider>
+  </MessageScroller>
 </div>
 ```
 
 ## Composition
 
 ```text
-MessageScroller.Provider
+MessageScroller
 └── MessageScroller.Root
     ├── MessageScroller.Viewport
     │   └── MessageScroller.Content
@@ -118,7 +118,7 @@ MessageScroller.Provider
     └── MessageScroller.Button
 ```
 
-- `MessageScroller.Provider` is the headless root. It owns opening position, follow-output, anchoring, scroll commands, and visibility state.
+- `MessageScroller` is the headless root. It owns opening position, follow-output, anchoring, scroll commands, and visibility state.
 - `MessageScroller.Root` is the styled frame.
 - `MessageScroller.Viewport` receives native scroll input and preserves the visible row when history is prepended.
 - `MessageScroller.Content` is the transcript container and defaults to a live log.
@@ -377,8 +377,8 @@ When a transcript is large enough to need virtualization, use `MessageScroller.V
 
 ```tsx showLineNumbers
 import { createVirtualizer } from "@tanstack/solid-virtual";
-import type { JSX } from "solid-js";
 import { For, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { MessageScroller } from "~/components/blocks/message-scroller";
 
 function VirtualizedTranscript(props: {
@@ -397,7 +397,7 @@ function VirtualizedTranscript(props: {
   });
 
   return (
-    <MessageScroller.Provider>
+    <MessageScroller>
       <MessageScroller.Root>
         <MessageScroller.Viewport ref={(element) => (viewportRef = element)}>
           <MessageScroller.Content class="block min-h-full">
@@ -432,7 +432,7 @@ function VirtualizedTranscript(props: {
         </MessageScroller.Viewport>
         <MessageScroller.Button />
       </MessageScroller.Root>
-    </MessageScroller.Provider>
+    </MessageScroller>
   );
 }
 ```
@@ -451,7 +451,7 @@ function VirtualizedTranscript(props: {
 
 This is native Solid composition rather than a wrapped primitive. The full implementation lives in the [Message Scroller source](https://github.com/carere/zaidan/tree/main/src/registry/kobalte/blocks/message-scroller).
 
-### MessageScroller.Provider
+### MessageScroller
 
 The headless root. It owns scroll state and the behavior props, provides them to the parts and hooks, and renders no DOM of its own.
 
@@ -465,7 +465,7 @@ The headless root. It owns scroll state and the behavior props, provides them to
 
 ### MessageScroller.Root
 
-The styled frame and layout container. It fills its parent, so use it inside a height-constrained layout, within a `MessageScroller.Provider`. Remaining props spread onto the frame `div`.
+The styled frame and layout container. It fills its parent, so use it inside a height-constrained layout, within a `MessageScroller`. Remaining props spread onto the frame `div`.
 
 The root mirrors the scroll-state attributes below (the viewport carries them too), so you can style the container by scroll state, such as edge fades on the frame.
 

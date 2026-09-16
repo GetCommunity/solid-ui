@@ -1,12 +1,7 @@
-import {
-  type ComponentProps,
-  type JSX,
-  mergeProps,
-  splitProps,
-  type ValidComponent
-} from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { merge, omit } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
+import { Polymorphic } from "@kobalte/core/polymorphic"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "~/lib/utils"
@@ -32,11 +27,11 @@ const buttonGroupVariants = cva(
 type ButtonGroupProps = ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>
 
 const ButtonGroup = (props: ButtonGroupProps) => {
-  const [local, others] = splitProps(props, ["class", "orientation"])
+  const others = omit(props, "class", "orientation")
   return (
     <div
-      class={cn(buttonGroupVariants({ orientation: local.orientation }), local.class)}
-      data-orientation={local.orientation}
+      class={cn(buttonGroupVariants({ orientation: props.orientation }), props.class)}
+      data-orientation={props.orientation}
       data-slot="button-group"
       role="group"
       {...others}
@@ -51,12 +46,12 @@ type ButtonGroupTextProps<T extends ValidComponent = "div"> = {
 } & Omit<ComponentProps<T>, "as" | "class" | "children">
 
 const ButtonGroupText = <T extends ValidComponent = "div">(rawProps: ButtonGroupTextProps<T>) => {
-  const props = mergeProps({ as: "div" as T } as const, rawProps)
-  const [local, others] = splitProps(props as ButtonGroupTextProps, ["as", "class"])
+  const props = merge({ as: "div" as T } as const, rawProps)
+  const others = omit(props as ButtonGroupTextProps, "as", "class")
   return (
-    <Dynamic
-      class={cn("cn-button-group-text flex items-center [&_svg]:pointer-events-none", local.class)}
-      component={local.as}
+    <Polymorphic
+      as={props.as}
+      class={cn("cn-button-group-text flex items-center [&_svg]:pointer-events-none", props.class)}
       data-slot="button-group-text"
       {...others}
     />
@@ -66,16 +61,16 @@ const ButtonGroupText = <T extends ValidComponent = "div">(rawProps: ButtonGroup
 type ButtonGroupSeparatorProps = ComponentProps<typeof Separator>
 
 const ButtonGroupSeparator = (props: ButtonGroupSeparatorProps) => {
-  const mergedProps = mergeProps({ orientation: "vertical" } as const, props)
-  const [local, others] = splitProps(mergedProps, ["class", "orientation"])
+  const mergedProps = merge({ orientation: "vertical" } as const, props)
+  const others = omit(mergedProps, "class", "orientation")
   return (
     <Separator
       class={cn(
         "cn-button-group-separator relative self-stretch data-[orientation=horizontal]:mx-px data-[orientation=vertical]:my-px data-[orientation=vertical]:h-auto data-[orientation=horizontal]:w-auto",
-        local.class
+        props.class
       )}
       data-slot="button-group-separator"
-      orientation={local.orientation}
+      orientation={props.orientation}
       {...others}
     />
   )

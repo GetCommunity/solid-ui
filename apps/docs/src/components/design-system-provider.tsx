@@ -13,11 +13,7 @@ type DesignSystemContextType = {
 const DesignSystemContext = createContext<DesignSystemContextType>()
 
 export function useDesignSystem() {
-  const context = useContext(DesignSystemContext)
-  if (context === undefined) {
-    throw new Error("[SolidUI]: `useDesignSystem` must be used within a `DesignSystemProvider`")
-  }
-  return context
+  return useContext(DesignSystemContext)
 }
 
 export function DesignSystemProvider(props: ParentProps) {
@@ -43,7 +39,5 @@ export function DesignSystemProvider(props: ParentProps) {
     setIconLibrary
   }
 
-  return (
-    <DesignSystemContext.Provider value={context}>{props.children}</DesignSystemContext.Provider>
-  )
+  return <DesignSystemContext value={context}>{props.children}</DesignSystemContext>
 }

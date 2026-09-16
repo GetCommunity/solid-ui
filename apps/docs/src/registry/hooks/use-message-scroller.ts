@@ -1,11 +1,5 @@
-import {
-  type Accessor,
-  type ComponentProps,
-  createEffect,
-  createSignal,
-  type JSX,
-  onCleanup
-} from "solid-js"
+import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import type { ButtonProps } from "~/registry/ui/button"
 

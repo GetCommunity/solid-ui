@@ -1,12 +1,7 @@
-import {
-  type ComponentProps,
-  type JSX,
-  mergeProps,
-  splitProps,
-  type ValidComponent
-} from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { merge, omit } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
+import { Polymorphic } from "@kobalte/core/polymorphic"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "~/lib/utils"
@@ -14,10 +9,10 @@ import { cn } from "~/lib/utils"
 type BubbleGroupProps = ComponentProps<"div">
 
 const BubbleGroup = (props: BubbleGroupProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-bubble-group flex min-w-0 flex-col", local.class)}
+      class={cn("cn-bubble-group flex min-w-0 flex-col", props.class)}
       data-slot="bubble-group"
       {...others}
     />
@@ -47,14 +42,14 @@ type BubbleProps = ComponentProps<"div"> &
   }
 
 const Bubble = (rawProps: BubbleProps) => {
-  const props = mergeProps({ align: "start" as const, variant: "default" as const }, rawProps)
-  const [local, others] = splitProps(props, ["align", "class", "variant"])
+  const props = merge({ align: "start" as const, variant: "default" as const }, rawProps)
+  const others = omit(props, "align", "class", "variant")
   return (
     <div
-      class={cn(bubbleVariants({ variant: local.variant }), local.class)}
-      data-align={local.align}
+      class={cn(bubbleVariants({ variant: props.variant }), props.class)}
+      data-align={props.align}
       data-slot="bubble"
-      data-variant={local.variant}
+      data-variant={props.variant}
       {...others}
     />
   )
@@ -67,15 +62,15 @@ type BubbleContentProps<T extends ValidComponent = "div"> = {
 } & Omit<ComponentProps<T>, "as" | "class" | "children">
 
 const BubbleContent = <T extends ValidComponent = "div">(rawProps: BubbleContentProps<T>) => {
-  const props = mergeProps({ as: "div" as T } as const, rawProps)
-  const [local, others] = splitProps(props as BubbleContentProps, ["as", "class"])
+  const props = merge({ as: "div" as T } as const, rawProps)
+  const others = omit(props as BubbleContentProps, "as", "class")
   return (
-    <Dynamic
+    <Polymorphic
+      as={props.as}
       class={cn(
         "cn-bubble-content wrap-break-word w-fit min-w-0 max-w-full overflow-hidden [button,a]:transition-colors [button]:text-left",
-        local.class
+        props.class
       )}
-      component={local.as}
       data-slot="bubble-content"
       {...others}
     />
@@ -108,13 +103,13 @@ type BubbleReactionsProps = ComponentProps<"div"> & {
 }
 
 const BubbleReactions = (rawProps: BubbleReactionsProps) => {
-  const props = mergeProps({ align: "end" as const, side: "bottom" as const }, rawProps)
-  const [local, others] = splitProps(props, ["align", "class", "side"])
+  const props = merge({ align: "end" as const, side: "bottom" as const }, rawProps)
+  const others = omit(props, "align", "class", "side")
   return (
     <div
-      class={cn(bubbleReactionsVariants({ align: local.align, side: local.side }), local.class)}
-      data-align={local.align}
-      data-side={local.side}
+      class={cn(bubbleReactionsVariants({ align: props.align, side: props.side }), props.class)}
+      data-align={props.align}
+      data-side={props.side}
       data-slot="bubble-reactions"
       {...others}
     />

@@ -1,5 +1,5 @@
-import type { ComponentProps, JSX, ValidComponent } from "solid-js"
-import { splitProps } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import { ChevronRight, Ellipsis } from "lucide-solid"
@@ -12,17 +12,17 @@ type BreadcrumbProps<T extends ValidComponent = "nav"> = ComponentProps<T> & {
 }
 
 const Breadcrumb = <T extends ValidComponent = "nav">(
-  rawProps: PolymorphicProps<T, BreadcrumbProps<T>>
+  props: PolymorphicProps<T, BreadcrumbProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbProps, ["class", "children"])
+  const others = omit(props as BreadcrumbProps, "class", "children")
   return (
     <nav
       aria-label="breadcrumb"
-      class={cn("cn-breadcrumb", local.class)}
+      class={cn("cn-breadcrumb", props.class)}
       data-slot="breadcrumb"
       {...others}
     >
-      {local.children}
+      {props.children}
     </nav>
   )
 }
@@ -33,16 +33,16 @@ type BreadcrumbListProps<T extends ValidComponent = "ol"> = ComponentProps<T> & 
 }
 
 const BreadcrumbList = <T extends ValidComponent = "ol">(
-  rawProps: PolymorphicProps<T, BreadcrumbListProps<T>>
+  props: PolymorphicProps<T, BreadcrumbListProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbListProps, ["class", "children"])
+  const others = omit(props as BreadcrumbListProps, "class", "children")
   return (
     <ol
-      class={cn("cn-breadcrumb-list flex flex-wrap items-center break-words", local.class)}
+      class={cn("cn-breadcrumb-list flex flex-wrap items-center break-words", props.class)}
       data-slot="breadcrumb-list"
       {...others}
     >
-      {local.children}
+      {props.children}
     </ol>
   )
 }
@@ -53,16 +53,16 @@ type BreadcrumbItemProps<T extends ValidComponent = "li"> = ComponentProps<T> & 
 }
 
 const BreadcrumbItem = <T extends ValidComponent = "li">(
-  rawProps: PolymorphicProps<T, BreadcrumbItemProps<T>>
+  props: PolymorphicProps<T, BreadcrumbItemProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbItemProps, ["class", "children"])
+  const others = omit(props as BreadcrumbItemProps, "class", "children")
   return (
     <li
-      class={cn("cn-breadcrumb-item inline-flex items-center", local.class)}
+      class={cn("cn-breadcrumb-item inline-flex items-center", props.class)}
       data-slot="breadcrumb-item"
       {...others}
     >
-      {local.children}
+      {props.children}
     </li>
   )
 }
@@ -73,12 +73,12 @@ type BreadcrumbLinkProps<T extends ValidComponent = "a"> = ComponentProps<T> & {
 }
 
 const BreadcrumbLink = <T extends ValidComponent = "a">(
-  rawProps: PolymorphicProps<T, BreadcrumbLinkProps<T>>
+  props: PolymorphicProps<T, BreadcrumbLinkProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbLinkProps, ["class", "children"])
+  const others = omit(props as BreadcrumbLinkProps, "class", "children")
   return (
-    <a class={cn("cn-breadcrumb-link", local.class)} data-slot="breadcrumb-link" {...others}>
-      {local.children}
+    <a class={cn("cn-breadcrumb-link", props.class)} data-slot="breadcrumb-link" {...others}>
+      {props.children}
     </a>
   )
 }
@@ -89,20 +89,20 @@ type BreadcrumbPageProps<T extends ValidComponent = "span"> = ComponentProps<T> 
 }
 
 const BreadcrumbPage = <T extends ValidComponent = "span">(
-  rawProps: PolymorphicProps<T, BreadcrumbPageProps<T>>
+  props: PolymorphicProps<T, BreadcrumbPageProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbPageProps, ["class", "children"])
+  const others = omit(props as BreadcrumbPageProps, "class", "children")
   return (
     // biome-ignore lint/a11y/useFocusableInteractive: <exception for breadcumb>
     <span
       aria-current="page"
       aria-disabled="true"
-      class={cn("cn-breadcrumb-page", local.class)}
+      class={cn("cn-breadcrumb-page", props.class)}
       data-slot="breadcrumb-page"
       role="link"
       {...others}
     >
-      {local.children}
+      {props.children}
     </span>
   )
 }
@@ -113,18 +113,18 @@ type BreadcrumbSeparatorProps<T extends ValidComponent = "li"> = ComponentProps<
 }
 
 const BreadcrumbSeparator = <T extends ValidComponent = "li">(
-  rawProps: PolymorphicProps<T, BreadcrumbSeparatorProps<T>>
+  props: PolymorphicProps<T, BreadcrumbSeparatorProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbSeparatorProps, ["class", "children"])
+  const others = omit(props as BreadcrumbSeparatorProps, "class", "children")
   return (
     <li
       aria-hidden="true"
-      class={cn("cn-breadcrumb-separator", local.class)}
+      class={cn("cn-breadcrumb-separator", props.class)}
       data-slot="breadcrumb-separator"
       role="presentation"
       {...others}
     >
-      {local.children ?? <ChevronRight />}
+      {props.children ?? <ChevronRight />}
     </li>
   )
 }
@@ -134,13 +134,13 @@ type BreadcrumbEllipsisProps<T extends ValidComponent = "span"> = ComponentProps
 }
 
 const BreadcrumbEllipsis = <T extends ValidComponent = "span">(
-  rawProps: PolymorphicProps<T, BreadcrumbEllipsisProps<T>>
+  props: PolymorphicProps<T, BreadcrumbEllipsisProps<T>>
 ) => {
-  const [local, others] = splitProps(rawProps as BreadcrumbEllipsisProps, ["class"])
+  const others = omit(props as BreadcrumbEllipsisProps, "class")
   return (
     <span
       aria-hidden="true"
-      class={cn("cn-breadcrumb-ellipsis flex items-center justify-center", local.class)}
+      class={cn("cn-breadcrumb-ellipsis flex items-center justify-center", props.class)}
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       {...others}

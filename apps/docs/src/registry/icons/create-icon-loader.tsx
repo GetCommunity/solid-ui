@@ -1,12 +1,5 @@
-import {
-  type Component,
-  type ComponentProps,
-  createSignal,
-  onMount,
-  Show,
-  splitProps
-} from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { type Component, createMemo, omit, Show } from "solid-js"
+import { type ComponentProps, Dynamic } from "@solidjs/web"
 
 import type { IconLibraryName } from "~/registry/icon-libraries"
 
@@ -30,18 +23,13 @@ function loadIconLibrary(libraryName: IconLibraryName) {
 
 export function createIconLoader(libraryName: IconLibraryName) {
   return function IconLoader(props: { name: string } & ComponentProps<"svg">) {
-    const [local, svgProps] = splitProps(props, ["name"])
-    const [icons, setIcons] = createSignal<IconLibraryModule>()
-
-    onMount(async () => {
-      const loadedIcons = await loadIconLibrary(libraryName)
-      setIcons(loadedIcons)
-    })
+    const svgProps = omit(props, "name")
+    const icons = createMemo<IconLibraryModule>(async () => await loadIconLibrary(libraryName))
 
     return (
       <Show
         fallback={<span class="size-4" />}
-        when={icons()?.[local.name] as IconComponent | undefined}
+        when={icons()?.[props.name] as IconComponent | undefined}
       >
         {(IconComponent) => <Dynamic component={IconComponent()} {...svgProps} />}
       </Show>

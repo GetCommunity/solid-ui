@@ -1,17 +1,15 @@
 import {
-  type ComponentProps,
   createContext,
   createEffect,
   createMemo,
   createSignal,
   createUniqueId,
-  type JSX,
-  on,
   onCleanup,
-  onMount,
+  onSettled,
   untrack,
   useContext
 } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import type { ButtonProps } from "~/registry/ui/button"
 
@@ -707,7 +705,7 @@ type CreateQuestionnaireRootParameters = Pick<
   | "defaultItem"
   | "item"
   | "items"
-  | "noValidate"
+  | "novalidate"
   | "onItemChange"
   | "onKeyDown"
   | "onReset"
@@ -733,7 +731,7 @@ function createQuestionnaireRoot(props: CreateQuestionnaireRootParameters) {
   const controlled = () => props.item !== undefined
   const activeItemName = () => (controlled() ? (props.item ?? null) : uncontrolledItem())
   let previousActiveItemName = untrack(activeItemName)
-  const nativeValidation = () => props.noValidate === false
+  const nativeValidation = () => props.novalidate === false
   const shortcuts = () => props.shortcuts ?? null
 
   if (import.meta.env.DEV) {
@@ -784,7 +782,7 @@ function createQuestionnaireRoot(props: CreateQuestionnaireRootParameters) {
     })
   }
 
-  onMount(() => {
+  onSettled(() => {
     if (!rootElement || typeof MutationObserver === "undefined") {
       return
     }
@@ -870,44 +868,54 @@ function createQuestionnaireRoot(props: CreateQuestionnaireRootParameters) {
     props.onItemChange?.(nextItem)
   }
 
-  createEffect(() => {
-    if (total() === 0) {
-      return
-    }
-
-    if (currentIndex() < 0) {
-      const item = logicalItems()[0]
-      if (!controlled() && activeItemName() === null) {
-        if (item) setUncontrolledItem(item.name)
+  createEffect(
+    () => ({
+      total: total(),
+      currentIndex: currentIndex(),
+      logicalItems: logicalItems(),
+      controlled: controlled(),
+      activeItemName: activeItemName(),
+      activeItem: activeItem()
+    }),
+    (v) => {
+      if (v.total === 0) {
         return
       }
 
-      if (item) setItem(item.name)
-      return
-    }
+      if (v.currentIndex < 0) {
+        const item = v.logicalItems[0]
+        if (!v.controlled && v.activeItemName === null) {
+          if (item) setUncontrolledItem(item.name)
+          return
+        }
 
-    const currentPendingFocus = pendingFocus
-    const activeItemChanged = previousActiveItemName !== activeItemName()
-
-    previousActiveItemName = activeItemName()
-
-    if (!currentPendingFocus || currentPendingFocus.name !== activeItemName()) {
-      if (controlled() && activeItemChanged) {
-        pendingFocus = null
-        activeItem()?.focus()
+        if (item) setItem(item.name)
+        return
       }
 
-      return
-    }
+      const currentPendingFocus = pendingFocus
+      const activeItemChanged = previousActiveItemName !== v.activeItemName
 
-    if (currentPendingFocus.target === "invalid") {
-      activeItem()?.focusInvalid()
-    } else {
-      activeItem()?.focus()
-    }
+      previousActiveItemName = v.activeItemName
 
-    pendingFocus = null
-  })
+      if (!currentPendingFocus || currentPendingFocus.name !== v.activeItemName) {
+        if (v.controlled && activeItemChanged) {
+          pendingFocus = null
+          v.activeItem?.focus()
+        }
+
+        return
+      }
+
+      if (currentPendingFocus.target === "invalid") {
+        v.activeItem?.focusInvalid()
+      } else {
+        v.activeItem?.focus()
+      }
+
+      pendingFocus = null
+    }
+  )
 
   const registerItem = (registration: ItemRegistration) => {
     setRegistrations((currentRegistrations) => [
@@ -1293,16 +1301,17 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
 
   let previousStatus = untrack(status)
 
-  createEffect(() => {
-    const currentStatus = status()
+  createEffect(
+    () => status(),
+    (currentStatus) => {
+      if (previousStatus === currentStatus) {
+        return
+      }
 
-    if (previousStatus === currentStatus) {
-      return
+      previousStatus = currentStatus
+      props.onStatusChange?.(currentStatus)
     }
-
-    previousStatus = currentStatus
-    props.onStatusChange?.(currentStatus)
-  })
+  )
 
   const registerAnswerControl = (registration: AnswerControlRegistration) => {
     setAnswerControlRegistrations((currentRegistrations) => [
@@ -1483,23 +1492,20 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
   // Collapse a multi-selection down to a single answer when the item leaves
   // multiple mode.
   createEffect(
-    on(
-      multiple,
-      (isMultiple, wasMultiple) => {
-        if (!wasMultiple || isMultiple) {
-          return
-        }
+    () => multiple(),
+    (isMultiple, wasMultiple) => {
+      if (!wasMultiple || isMultiple) {
+        return
+      }
 
-        setSelectedAnswerIds((currentAnswerIds) => {
-          const selectedAnswer = untrack(answers).find((answer) =>
-            currentAnswerIds.includes(answer.id)
-          )
+      setSelectedAnswerIds((currentAnswerIds) => {
+        const selectedAnswer = untrack(answers).find((answer) =>
+          currentAnswerIds.includes(answer.id)
+        )
 
-          return selectedAnswer ? [selectedAnswer.id] : []
-        })
-      },
-      { defer: true }
-    )
+        return selectedAnswer ? [selectedAnswer.id] : []
+      })
+    }
   )
 
   const getAnswerByElement = (answerElement: Element) =>
@@ -1566,7 +1572,7 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
     return true
   }
 
-  onMount(() => {
+  onSettled(() => {
     const currentElement = untrack(element)
 
     if (!currentElement) {
@@ -1582,7 +1588,7 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
         )
       },
       get disabled() {
-        return disabled()
+        return Boolean(disabled())
       },
       element: currentElement,
       focus,
@@ -1612,7 +1618,7 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
       return active()
     },
     get disabled() {
-      return disabled()
+      return Boolean(disabled())
     },
     get hasInputAnswer() {
       return hasInputAnswer()
@@ -1681,7 +1687,7 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
       return active()
     },
     get disabled() {
-      return disabled()
+      return Boolean(disabled())
     },
     get invalid() {
       return invalid()
@@ -1704,7 +1710,7 @@ function createQuestionnaireItem(props: CreateQuestionnaireItemParameters) {
         return describedBy()
       },
       get "aria-invalid"() {
-        return invalid() || undefined
+        return invalid() ? "true" : "false"
       },
       get "aria-keyshortcuts"() {
         return keyShortcuts()
@@ -1756,61 +1762,71 @@ function createQuestionnaireChoice(
       null
   )
 
-  onMount(() => {
+  onSettled(() => {
+    itemContext.setAnswerDefault(answerId, props.defaultChecked ?? false)
     onCleanup(itemContext.registerAnswerSelection(answerId, initialDefaultChecked))
   })
 
-  createEffect(() => {
-    itemContext.setAnswerDefault(answerId, props.defaultChecked ?? false)
-  })
+  createEffect(
+    () => inputElement(),
+    (element) => {
+      if (!element) {
+        return
+      }
 
-  createEffect(() => {
-    const element = inputElement()
+      const registration: AnswerControlRegistration = {
+        get disabled() {
+          return disabled()
+        },
+        element,
+        id: answerId,
+        get ownDisabled() {
+          return choiceDisabled()
+        },
+        type: "choice",
+        get value() {
+          return props.value
+        }
+      }
 
-    if (!element) {
-      return
+      onCleanup(itemContext.registerAnswerControl(registration))
     }
+  )
 
-    const registration: AnswerControlRegistration = {
-      get disabled() {
-        return disabled()
-      },
-      element,
-      id: answerId,
-      get ownDisabled() {
-        return choiceDisabled()
-      },
-      type: "choice",
-      get value() {
-        return props.value
+  createEffect(
+    () => controlled(),
+    (controlled) => {
+      if (controlled) {
+        itemContext.resetVersion
+        itemContext.syncControlledAnswerSelection(answerId, Boolean(props.checked))
       }
     }
+  )
 
-    onCleanup(itemContext.registerAnswerControl(registration))
-  })
+  createEffect(
+    () => ({
+      inputElement: inputElement(),
+      controlled: controlled(),
+      checked: checked()
+    }),
+    (v) => {
+      const element = v.inputElement
 
-  createEffect(() => {
-    if (controlled()) {
-      itemContext.resetVersion
-      itemContext.syncControlledAnswerSelection(answerId, Boolean(props.checked))
+      if (!element) {
+        return
+      }
+
+      // Keep the native reset target aligned with Questionnaire's owned default,
+      // including controlled choices whose checked prop remains authoritative.
+      element.defaultChecked = v.controlled
+        ? Boolean(props.checked)
+        : (props.defaultChecked ?? false)
+
+      if (itemContext.resetVersion > 0) {
+        element.checked = v.checked
+      }
     }
-  })
-
-  createEffect(() => {
-    const element = inputElement()
-
-    if (!element) {
-      return
-    }
-
-    // Keep the native reset target aligned with Questionnaire's owned default,
-    // including controlled choices whose checked prop remains authoritative.
-    element.defaultChecked = controlled() ? Boolean(props.checked) : (props.defaultChecked ?? false)
-
-    if (itemContext.resetVersion > 0) {
-      element.checked = checked()
-    }
-  })
+  )
 
   const handleChange: JSX.EventHandler<HTMLInputElement, Event> = (event) => {
     props.onChange?.(event)
@@ -1850,7 +1866,7 @@ function createQuestionnaireChoice(
   return {
     inputProps: {
       get "aria-invalid"() {
-        return itemContext.invalid || undefined
+        return itemContext.invalid ? "true" : "false"
       },
       get "aria-keyshortcuts"() {
         return getAnswerKeyShortcuts(shortcut(), !disabled() && checked())
@@ -1903,15 +1919,12 @@ function createQuestionnaireInput(props: CreateQuestionnaireInputParameters) {
   const filled = () => (controlled() ? controlledFilled() : uncontrolledFilled())
   const selected = () => itemContext.selectedAnswerIds.includes(answerId)
 
-  onMount(() => {
+  onSettled(() => {
+    itemContext.setAnswerDefault(answerId, defaultFilled())
     onCleanup(itemContext.registerAnswerSelection(answerId, initialDefaultFilled))
   })
 
-  createEffect(() => {
-    itemContext.setAnswerDefault(answerId, defaultFilled())
-  })
-
-  onMount(() => {
+  onSettled(() => {
     const element = untrack(inputElement)
 
     // Solid divergence: apply the uncontrolled default value imperatively so
@@ -1921,51 +1934,65 @@ function createQuestionnaireInput(props: CreateQuestionnaireInputParameters) {
     }
   })
 
-  createEffect(() => {
-    const element = inputElement()
+  createEffect(
+    () => inputElement(),
+    (element) => {
+      if (!element) {
+        return
+      }
 
-    if (!element) {
-      return
+      const registration: AnswerControlRegistration = {
+        get disabled() {
+          return Boolean(disabled())
+        },
+        element,
+        id: answerId,
+        type: "input"
+      }
+
+      onCleanup(itemContext.registerAnswerControl(registration))
     }
+  )
 
-    const registration: AnswerControlRegistration = {
-      get disabled() {
-        return disabled()
-      },
-      element,
-      id: answerId,
-      type: "input"
+  createEffect(
+    () => ({
+      controlled: controlled(),
+      controlledFilled: controlledFilled(),
+      defaultFilled: defaultFilled()
+    }),
+    (v) => {
+      if (v.controlled) {
+        itemContext.resetVersion
+        itemContext.syncControlledAnswerSelection(answerId, v.controlledFilled)
+        return
+      }
+
+      if (itemContext.resetVersion > 0) {
+        setUncontrolledFilled(v.defaultFilled)
+      }
     }
+  )
 
-    onCleanup(itemContext.registerAnswerControl(registration))
-  })
+  createEffect(
+    () => ({
+      inputElement: inputElement(),
+      controlled: controlled()
+    }),
+    (v) => {
+      const element = v.inputElement
 
-  createEffect(() => {
-    if (controlled()) {
-      itemContext.resetVersion
-      itemContext.syncControlledAnswerSelection(answerId, controlledFilled())
-      return
+      if (!element) {
+        return
+      }
+
+      // Keep the native reset target aligned with the value Questionnaire owns.
+      element.defaultValue = v.controlled
+        ? String(props.value)
+        : props.defaultValue !== undefined
+          ? String(props.defaultValue)
+          : ""
     }
-
-    if (itemContext.resetVersion > 0) {
-      setUncontrolledFilled(defaultFilled())
-    }
-  })
-
-  createEffect(() => {
-    const element = inputElement()
-
-    if (!element) {
-      return
-    }
-
-    // Keep the native reset target aligned with the value Questionnaire owns.
-    element.defaultValue = controlled()
-      ? String(props.value)
-      : props.defaultValue !== undefined
-        ? String(props.defaultValue)
-        : ""
-  })
+  )
 
   const handleInput: JSX.EventHandler<HTMLInputElement, InputEvent> = (event) => {
     props.onInput?.(event)
@@ -1991,7 +2018,7 @@ function createQuestionnaireInput(props: CreateQuestionnaireInputParameters) {
 
   const state: QuestionnaireInputState = {
     get disabled() {
-      return disabled()
+      return Boolean(disabled())
     },
     get filled() {
       return filled()
@@ -2004,7 +2031,7 @@ function createQuestionnaireInput(props: CreateQuestionnaireInputParameters) {
   return {
     inputProps: {
       get "aria-invalid"() {
-        return itemContext.invalid || undefined
+        return itemContext.invalid ? "true" : "false"
       },
       get "aria-keyshortcuts"() {
         return getAnswerKeyShortcuts(null, !disabled() && filled() && selected())
@@ -2074,5 +2101,8 @@ export {
   type QuestionnaireItemDefinition,
   type QuestionnaireItemStatus,
   type QuestionnaireRootState,
-  type QuestionnaireShortcutMode
+  type QuestionnaireShortcutMode,
+  type QuestionnaireChoiceShortcutState,
+  type QuestionnaireChoicesState,
+  type QuestionnaireNavigationState
 }

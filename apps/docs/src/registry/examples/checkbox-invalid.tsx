@@ -5,7 +5,7 @@ export default function CheckboxInvalid() {
   return (
     <FieldGroup class="mx-auto w-56">
       <Field data-invalid orientation="horizontal">
-        <Checkbox aria-invalid id="terms-checkbox-invalid" name="terms-checkbox-invalid" />
+        <Checkbox aria-invalid="true" id="terms-checkbox-invalid" name="terms-checkbox-invalid" />
         <FieldLabel for="terms-checkbox-invalid">Accept terms and conditions</FieldLabel>
       </Field>
     </FieldGroup>

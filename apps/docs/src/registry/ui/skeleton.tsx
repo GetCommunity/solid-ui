@@ -1,12 +1,12 @@
-import type { ComponentProps } from "solid-js"
-import { splitProps } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import { cn } from "~/lib/utils"
 
 const Skeleton = (props: ComponentProps<"div">) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
-    <div class={cn("cn-skeleton animate-pulse", local.class)} data-slot="skeleton" {...others} />
+    <div class={cn("cn-skeleton animate-pulse", props.class)} data-slot="skeleton" {...others} />
   )
 }
 

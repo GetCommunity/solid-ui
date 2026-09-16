@@ -3,8 +3,9 @@ import {
   createContext,
   createMemo,
   createSignal,
-  type JSX,
+  type Element,
   type Setter,
+  untrack,
   useContext
 } from "solid-js"
 
@@ -37,25 +38,27 @@ type LanguageContextType = {
   setLanguage: Setter<Language>
 }
 
-const LanguageContext = createContext<LanguageContextType>()
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 interface LanguageProviderProps {
-  children: JSX.Element
+  children: Element
   defaultLanguage?: Language
 }
 
 const LanguageProvider = (props: LanguageProviderProps) => {
-  const [language, setLanguage] = createSignal<Language>(props.defaultLanguage ?? "ar")
+  const [language, setLanguage] = createSignal<Language>(
+    untrack(() => props.defaultLanguage ?? "ar")
+  )
 
   return (
-    <LanguageContext.Provider
+    <LanguageContext
       value={{
         language,
         setLanguage
       }}
     >
       {props.children}
-    </LanguageContext.Provider>
+    </LanguageContext>
   )
 }
 

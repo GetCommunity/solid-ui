@@ -1,5 +1,5 @@
-import type { ValidComponent } from "solid-js"
-import { splitProps } from "solid-js"
+import { omit } from "solid-js"
+import type { ValidComponent } from "@solidjs/web"
 
 import * as CollapsiblePrimitive from "@kobalte/core/collapsible"
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
@@ -14,10 +14,10 @@ type CollapsibleProps<T extends ValidComponent = "div"> =
 const Collapsible = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, CollapsibleProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CollapsibleProps, ["class"])
+  const others = omit(props as CollapsibleProps, "class")
   return (
     <CollapsiblePrimitive.Root
-      class={cn("cn-collapsible", local.class)}
+      class={cn("cn-collapsible", props.class)}
       data-slot="collapsible"
       {...others}
     />
@@ -32,10 +32,10 @@ type CollapsibleTriggerProps<T extends ValidComponent = "button"> =
 const CollapsibleTrigger = <T extends ValidComponent = "button">(
   props: PolymorphicProps<T, CollapsibleTriggerProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CollapsibleTriggerProps, ["class"])
+  const others = omit(props as CollapsibleTriggerProps, "class")
   return (
     <CollapsiblePrimitive.Trigger
-      class={cn("cn-collapsible-trigger", local.class)}
+      class={cn("cn-collapsible-trigger", props.class)}
       data-slot="collapsible-trigger"
       {...others}
     />
@@ -50,10 +50,10 @@ type CollapsibleContentProps<T extends ValidComponent = "div"> =
 const CollapsibleContent = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, CollapsibleContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as CollapsibleContentProps, ["class"])
+  const others = omit(props as CollapsibleContentProps, "class")
   return (
     <CollapsiblePrimitive.Content
-      class={cn("cn-collapsible-content", local.class)}
+      class={cn("cn-collapsible-content", props.class)}
       data-slot="collapsible-content"
       {...others}
     />

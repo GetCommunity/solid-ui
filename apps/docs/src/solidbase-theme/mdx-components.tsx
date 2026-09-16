@@ -1,17 +1,12 @@
-import {
-  type ComponentProps,
-  children,
-  createSignal,
-  For,
-  type ParentProps,
-  Show,
-  splitProps
-} from "solid-js"
+import { children, createSignal, For, omit, type ParentProps, Show, untrack } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { cookieStorage, makePersisted, messageSync } from "@solid-primitives/storage"
 import { TerminalIcon } from "lucide-solid"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/registry/ui/tabs"
+
+type ComponentProps<Tag extends keyof JSX.IntrinsicElements> = JSX.IntrinsicElements[Tag]
 
 export const h1 = (props: ComponentProps<"h1">) => {
   return <h1 class="mt-2 scroll-m-28 font-bold font-heading text-3xl tracking-tight" {...props} />
@@ -70,8 +65,8 @@ export const blockquote = (props: ComponentProps<"blockquote">) => {
 }
 
 export const img = (props: ComponentProps<"img">) => {
-  const [local, others] = splitProps(props, ["alt"])
-  return <img alt={local.alt} class="rounded-md" {...others} />
+  const others = omit(props, "alt")
+  return <img alt={props.alt} class="rounded-md" {...others} />
 }
 
 export const hr = (props: ComponentProps<"hr">) => {
@@ -151,17 +146,19 @@ export function DirectiveContainer(
     withTsJsToggle?: string
   } & ParentProps
 ) {
-  const _children = children(() => props.children).toArray()
+  const resolvedChildren = children(() => props.children)
+  const _children = untrack(() => resolvedChildren.toArray())
+  const type = untrack(() => props.type)
+  const title = untrack(() => props.title)
+  const tabNames = untrack(() => props.tabNames?.split("\0")) as string[]
 
-  if (props.type === "tab") {
+  if (type === "tab") {
     return _children
   }
 
-  if (props.type === "tab-group") {
-    const tabNames = props.tabNames?.split("\0") as string[]
-
+  if (type === "tab-group") {
     const [openTab, setOpenTab] = makePersisted(createSignal(tabNames[0]), {
-      name: `tab-group:${props.title}`,
+      name: `tab-group:${title}`,
       sync: messageSync(new BroadcastChannel("tab-group")),
       // biome-ignore lint/complexity/useLiteralKeys: <TS don't allow dynamic keys as literals>
       storage: cookieStorage["withOptions"]({
@@ -169,8 +166,7 @@ export function DirectiveContainer(
       })
     })
 
-    if (props.title === "package-manager") {
-      const tabNames = props.tabNames?.split("\0")
+    if (title === "package-manager") {
       return (
         <div class="mt-6 rounded-lg bg-accent first:mt-0 dark:bg-zinc-900">
           <Tabs class="gap-0" onChange={setOpenTab} value={openTab?.()}>
@@ -239,19 +235,19 @@ export function DirectiveContainer(
     )
   }
 
-  if (props.type === "details") {
+  if (type === "details") {
     return (
       <details class="custom-container" data-custom-container="details">
-        <summary>{props.title ?? props.type}</summary>
+        <summary>{title ?? type}</summary>
         {_children}
       </details>
     )
   }
 
   return (
-    <div class="custom-container" data-custom-container={props.type}>
-      <Show when={props.title !== " "}>
-        <span>{props.title ?? props.type}</span>
+    <div class="custom-container" data-custom-container={type}>
+      <Show when={title !== " "}>
+        <span>{title ?? type}</span>
       </Show>
       {_children}
     </div>

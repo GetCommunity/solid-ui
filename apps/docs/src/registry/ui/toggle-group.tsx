@@ -1,5 +1,5 @@
-import type { ComponentProps, JSX, ValidComponent } from "solid-js"
-import { createContext, mergeProps, splitProps, useContext } from "solid-js"
+import { createContext, merge, omit, useContext } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import type { ToggleGroupItemProps, ToggleGroupRootProps } from "@kobalte/core/toggle-group"
@@ -32,21 +32,22 @@ type ToggleGroupProps<T extends ValidComponent = "div"> = PolymorphicProps<
   }
 
 const ToggleGroup = <T extends ValidComponent = "div">(rawProps: ToggleGroupProps<T>) => {
-  const props = mergeProps(
+  const props = merge(
     {
       spacing: 0,
       orientation: "horizontal"
     } as const,
     rawProps
   )
-  const [local, others] = splitProps(props as ToggleGroupProps, [
+  const others = omit(
+    props as ToggleGroupProps,
     "class",
     "children",
     "variant",
     "size",
     "spacing",
     "orientation"
-  ])
+  )
 
   return (
     <ToggleGroupPrimitive
@@ -55,26 +56,26 @@ const ToggleGroup = <T extends ValidComponent = "div">(rawProps: ToggleGroupProp
         "group group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))] rounded-md",
         "data-[spacing=default]:data-[variant=outline]:shadow-xs",
         "data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch",
-        local.class
+        props.class
       )}
-      data-orientation={local.orientation}
-      data-size={local.size}
+      data-orientation={props.orientation}
+      data-size={props.size}
       data-slot="toggle-group"
-      data-spacing={local.spacing}
-      data-variant={local.variant}
-      style={{ "--gap": local.spacing } as JSX.CSSProperties}
+      data-spacing={props.spacing}
+      data-variant={props.variant}
+      style={{ "--gap": props.spacing } as JSX.CSSProperties}
       {...others}
     >
-      <ToggleGroupContext.Provider
+      <ToggleGroupContext
         value={{
-          variant: local.variant,
-          size: local.size,
-          spacing: local.spacing,
-          orientation: local.orientation
+          variant: props.variant,
+          size: props.size,
+          spacing: props.spacing,
+          orientation: props.orientation
         }}
       >
-        {local.children}
-      </ToggleGroupContext.Provider>
+        {props.children}
+      </ToggleGroupContext>
     </ToggleGroupPrimitive>
   )
 }
@@ -89,21 +90,22 @@ type ToggleGroupItemComponentProps<T extends ValidComponent = "button"> = Polymo
 const ToggleGroupItem = <T extends ValidComponent = "button">(
   rawProps: ToggleGroupItemComponentProps<T>
 ) => {
-  const props = mergeProps({ variant: "default" as const, size: "default" as const }, rawProps)
-  const [local, others] = splitProps(props as ToggleGroupItemComponentProps, [
+  const props = merge({ variant: "default" as const, size: "default" as const }, rawProps)
+  const others = omit(
+    props as ToggleGroupItemComponentProps,
     "class",
     "children",
     "variant",
     "size"
-  ])
+  )
   const context = useContext(ToggleGroupContext)
 
   return (
     <ToggleGroupPrimitive.Item
       class={cn(
         toggleVariants({
-          variant: context.variant || local.variant,
-          size: context.size || local.size
+          variant: context.variant || props.variant,
+          size: context.size || props.size
         }),
         "cn-toggle-group-item",
         "focus:z-10 focus-visible:z-10",
@@ -116,15 +118,15 @@ const ToggleGroupItem = <T extends ValidComponent = "button">(
         "group-data-[orientation=horizontal]/toggle-group:data-[spacing=0]:last:rounded-r-md!",
         "group-data-[orientation=vertical]/toggle-group:data-[spacing=0]:first:rounded-t-md!",
         "group-data-[orientation=vertical]/toggle-group:data-[spacing=0]:last:rounded-b-md!",
-        local.class
+        props.class
       )}
-      data-size={context.size || local.size}
+      data-size={context.size || props.size}
       data-slot="toggle-group-item"
       data-spacing={context.spacing || 0}
-      data-variant={context.variant || local.variant}
+      data-variant={context.variant || props.variant}
       {...others}
     >
-      {local.children}
+      {props.children}
     </ToggleGroupPrimitive.Item>
   )
 }

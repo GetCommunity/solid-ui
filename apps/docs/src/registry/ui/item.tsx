@@ -1,19 +1,19 @@
-import { type ComponentProps, mergeProps, splitProps, type ValidComponent } from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { merge, omit } from "solid-js"
+import { type ComponentProps, Dynamic, type ValidComponent } from "@solidjs/web"
 
-import type { PolymorphicProps } from "@kobalte/core"
+import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "~/lib/utils"
 import { Separator } from "~/registry/ui/separator"
 
 function ItemGroup(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-item-group group/item-group flex w-full flex-col gap-4 has-data-[size=sm]:gap-2.5 has-data-[size=xs]:gap-2",
-        local.class
+        props.class
       )}
       data-slot="item-group"
       role="list"
@@ -25,10 +25,10 @@ function ItemGroup(props: ComponentProps<"div">) {
 type ItemSeparatorProps = ComponentProps<typeof Separator>
 
 function ItemSeparator(props: ItemSeparatorProps) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <Separator
-      class={cn("cn-item-separator my-2", local.class)}
+      class={cn("cn-item-separator my-2", props.class)}
       data-slot="item-separator"
       orientation="horizontal"
       {...others}
@@ -65,7 +65,7 @@ type ItemProps<T extends ValidComponent = "div"> = ComponentProps<T> &
   }
 
 const Item = <T extends ValidComponent = "div">(rawProps: PolymorphicProps<T, ItemProps<T>>) => {
-  const props = mergeProps(
+  const props = merge(
     {
       variant: "default",
       size: "default",
@@ -73,21 +73,21 @@ const Item = <T extends ValidComponent = "div">(rawProps: PolymorphicProps<T, It
     } as const,
     rawProps
   )
-  const [local, others] = splitProps(props as ItemProps, ["as", "class", "variant", "size"])
+  const others = omit(props as ItemProps, "as", "class", "variant", "size")
   return (
     <Dynamic
       class={cn(
         itemVariants({
-          variant: local.variant,
-          size: local.size,
+          variant: props.variant,
+          size: props.size,
           class: "cn-item"
         }),
-        local.class
+        props.class
       )}
-      component={local.as as any}
-      data-size={local.size}
+      component={props.as as any}
+      data-size={props.size}
       data-slot="item"
-      data-variant={local.variant}
+      data-variant={props.variant}
       {...others}
     />
   )
@@ -113,31 +113,31 @@ const itemMediaVariants = cva(
 type ItemMediaProps = ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>
 
 function ItemMedia(rawProps: ItemMediaProps) {
-  const props = mergeProps({ variant: "default" } as const, rawProps)
-  const [local, others] = splitProps(props as ItemMediaProps, ["class", "variant"])
+  const props = merge({ variant: "default" } as const, rawProps)
+  const others = omit(props as ItemMediaProps, "class", "variant")
   return (
     <div
       class={cn(
         itemMediaVariants({
-          variant: local.variant,
+          variant: props.variant,
           class: "cn-item-media"
         }),
-        local.class
+        props.class
       )}
       data-slot="item-media"
-      data-variant={local.variant}
+      data-variant={props.variant}
       {...others}
     />
   )
 }
 
 function ItemContent(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-item-content flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0 [&+[data-slot=item-content]]:flex-none",
-        local.class
+        props.class
       )}
       data-slot="item-content"
       {...others}
@@ -146,12 +146,12 @@ function ItemContent(props: ComponentProps<"div">) {
 }
 
 function ItemTitle(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-item-title line-clamp-1 flex w-fit items-center gap-2 font-medium text-sm leading-snug underline-offset-4",
-        local.class
+        props.class
       )}
       data-slot="item-title"
       {...others}
@@ -160,12 +160,12 @@ function ItemTitle(props: ComponentProps<"div">) {
 }
 
 function ItemDescription(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <p
       class={cn(
         "cn-item-description line-clamp-2 text-left font-normal text-muted-foreground text-sm leading-normal group-data-[size=xs]/item:text-xs [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
-        local.class
+        props.class
       )}
       data-slot="item-description"
       {...others}
@@ -174,10 +174,10 @@ function ItemDescription(props: ComponentProps<"div">) {
 }
 
 function ItemActions(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-item-actions flex items-center gap-2", local.class)}
+      class={cn("cn-item-actions flex items-center gap-2", props.class)}
       data-slot="item-actions"
       {...others}
     />
@@ -185,10 +185,10 @@ function ItemActions(props: ComponentProps<"div">) {
 }
 
 function ItemHeader(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-item-header flex basis-full items-center justify-between gap-2", local.class)}
+      class={cn("cn-item-header flex basis-full items-center justify-between gap-2", props.class)}
       data-slot="item-header"
       {...others}
     />
@@ -196,10 +196,10 @@ function ItemHeader(props: ComponentProps<"div">) {
 }
 
 function ItemFooter(props: ComponentProps<"div">) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-item-footer flex basis-full items-center justify-between gap-2", local.class)}
+      class={cn("cn-item-footer flex basis-full items-center justify-between gap-2", props.class)}
       data-slot="item-footer"
       {...others}
     />

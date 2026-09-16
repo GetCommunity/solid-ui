@@ -1,4 +1,6 @@
-import type { ComponentProps } from "solid-js"
+import type { JSX } from "@solidjs/web"
+
+type ComponentProps<Tag extends keyof JSX.IntrinsicElements> = JSX.IntrinsicElements[Tag]
 
 // LOGO
 

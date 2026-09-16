@@ -1,5 +1,5 @@
-import { createEffect, createSignal, Index, on, Show } from "solid-js"
-import { isServer } from "solid-js/web"
+import { createEffect, createSignal, For, onSettled, Show } from "solid-js"
+import { isServer } from "@solidjs/web"
 
 import type { TableOfContentsItemData } from "@kobalte/solidbase/client"
 import { useCurrentPageData } from "@kobalte/solidbase/client"
@@ -18,19 +18,19 @@ export function TableOfContents() {
   const [currentSection, setCurrentSection] = createSignal<string>()
   const [headings, setHeadings] = createSignal<TocItem[]>([])
 
-  createEffect(
-    on(toc, (newToc) => {
-      setHeadings(
-        flattenData(newToc).map((item) => {
-          const el = document.getElementById(item.href.slice(1)) ?? undefined
-          return { ...item, el }
-        })
-      )
-    })
-  )
+  createEffect(toc, (newToc) => {
+    setHeadings(
+      flattenData(newToc).map((item) => {
+        const el = document.getElementById(item.href.slice(1)) ?? undefined
+        return { ...item, el }
+      })
+    )
+  })
 
-  if (!isServer) {
-    window.addEventListener("scroll", () => {
+  onSettled(() => {
+    if (isServer) return
+
+    const updateCurrentSection = () => {
       let current: string | undefined
 
       for (const heading of headings()) {
@@ -42,8 +42,13 @@ export function TableOfContents() {
         }
       }
       setCurrentSection(current)
-    })
-  }
+    }
+
+    window.addEventListener("scroll", updateCurrentSection)
+    updateCurrentSection()
+
+    return () => window.removeEventListener("scroll", updateCurrentSection)
+  })
 
   return (
     <Show when={headings().length > 0}>
@@ -55,7 +60,7 @@ export function TableOfContents() {
           On This Page
         </h2>
         <ul class="flex list-none flex-col gap-2 text-sm">
-          <Index each={headings()}>
+          <For each={headings()} keyed={false}>
             {(section) => (
               <li style={{ "padding-left": `${section().depth}rem` }}>
                 <a
@@ -67,7 +72,7 @@ export function TableOfContents() {
                 </a>
               </li>
             )}
-          </Index>
+          </For>
         </ul>
       </nav>
     </Show>

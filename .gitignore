@@ -4,6 +4,7 @@ dist
 .vercel
 .netlify
 .turbo
+.pnpm-store
 netlify
 
 # Environment

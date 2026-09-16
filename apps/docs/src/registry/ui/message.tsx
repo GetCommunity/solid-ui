@@ -1,15 +1,15 @@
-import type { ComponentProps } from "solid-js"
-import { splitProps } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import { cn } from "~/lib/utils"
 
 type MessageGroupProps = ComponentProps<"div">
 
 const MessageGroup = (props: MessageGroupProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-message-group flex min-w-0 flex-col", local.class)}
+      class={cn("cn-message-group flex min-w-0 flex-col", props.class)}
       data-slot="message-group"
       {...others}
     />
@@ -19,13 +19,13 @@ const MessageGroup = (props: MessageGroupProps) => {
 type MessageProps = ComponentProps<"div"> & { align?: "start" | "end" }
 
 const Message = (props: MessageProps) => {
-  const [local, others] = splitProps(props, ["align", "class"])
-  const align = () => local.align ?? "start"
+  const others = omit(props, "align", "class")
+  const align = () => props.align ?? "start"
   return (
     <div
       class={cn(
         "cn-message group/message relative flex w-full min-w-0 data-[align=end]:flex-row-reverse",
-        local.class
+        props.class
       )}
       data-align={align()}
       data-slot="message"
@@ -37,12 +37,12 @@ const Message = (props: MessageProps) => {
 type MessageAvatarProps = ComponentProps<"div">
 
 const MessageAvatar = (props: MessageAvatarProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-message-avatar flex w-fit shrink-0 items-center justify-center self-end overflow-hidden rounded-full bg-muted",
-        local.class
+        props.class
       )}
       data-slot="message-avatar"
       {...others}
@@ -53,10 +53,10 @@ const MessageAvatar = (props: MessageAvatarProps) => {
 type MessageContentProps = ComponentProps<"div">
 
 const MessageContent = (props: MessageContentProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-message-content wrap-break-word flex w-full min-w-0 flex-col", local.class)}
+      class={cn("cn-message-content wrap-break-word flex w-full min-w-0 flex-col", props.class)}
       data-slot="message-content"
       {...others}
     />
@@ -66,10 +66,10 @@ const MessageContent = (props: MessageContentProps) => {
 type MessageHeaderProps = ComponentProps<"div">
 
 const MessageHeader = (props: MessageHeaderProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-message-header flex min-w-0 max-w-full items-center", local.class)}
+      class={cn("cn-message-header flex min-w-0 max-w-full items-center", props.class)}
       data-slot="message-header"
       {...others}
     />
@@ -79,12 +79,12 @@ const MessageHeader = (props: MessageHeaderProps) => {
 type MessageFooterProps = ComponentProps<"div">
 
 const MessageFooter = (props: MessageFooterProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-message-footer flex min-w-0 max-w-full items-center group-data-[align=end]/message:justify-end",
-        local.class
+        props.class
       )}
       data-slot="message-footer"
       {...others}

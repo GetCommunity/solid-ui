@@ -50,7 +50,7 @@ export default function InputGroupButtonExample() {
         <InputGroupAddon align="inline-end">
           <InputGroupButton
             aria-label="Toggle favorite"
-            aria-pressed={favorite()}
+            aria-pressed={favorite() && "true"}
             onClick={() => setFavorite((value) => !value)}
             size="icon-xs"
           >

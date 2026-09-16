@@ -1,4 +1,5 @@
-import { type ComponentProps, mergeProps, splitProps } from "solid-js"
+import { merge, omit } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import { ChevronDown } from "lucide-solid"
 
@@ -9,20 +10,20 @@ type NativeSelectProps = ComponentProps<"select"> & {
 }
 
 function NativeSelect(props: NativeSelectProps) {
-  const mergedProps = mergeProps({ size: "default" }, props)
-  const [local, others] = splitProps(mergedProps, ["class", "size"])
+  const mergedProps = merge({ size: "default" }, props)
+  const others = omit(mergedProps, "class", "size")
   return (
     <div
       class={cn(
         "group/native-select cn-native-select-wrapper relative w-fit has-[select:disabled]:opacity-50",
-        local.class
+        props.class
       )}
-      data-size={local.size}
+      data-size={props.size}
       data-slot="native-select-wrapper"
     >
       <select
         class="cn-native-select outline-none disabled:pointer-events-none disabled:cursor-not-allowed"
-        data-size={local.size}
+        data-size={props.size}
         data-slot="native-select"
         {...others}
       />
@@ -39,8 +40,8 @@ function NativeSelectOption(props: ComponentProps<"option">) {
 }
 
 function NativeSelectOptGroup(props: ComponentProps<"optgroup">) {
-  const [local, others] = splitProps(props, ["class"])
-  return <optgroup class={cn(local.class)} data-slot="native-select-optgroup" {...others} />
+  const others = omit(props, "class")
+  return <optgroup class={cn(props.class)} data-slot="native-select-optgroup" {...others} />
 }
 
 export { NativeSelect, NativeSelectOptGroup, NativeSelectOption }

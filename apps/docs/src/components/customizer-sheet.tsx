@@ -28,7 +28,7 @@ import {
 } from "~/registry/ui/sheet"
 
 function randomItem<T>(items: readonly T[]) {
-  return items[Math.floor(Math.random() * items.length)]!
+  return items[Math.floor(Math.random() * items.length)]
 }
 
 export function CustomizerSheet() {
@@ -42,8 +42,10 @@ export function CustomizerSheet() {
       ? iconLibraries[iconLibrary()]
       : randomItem(Object.values(iconLibraries))
 
-    setStyle(randomStyle)
-    setIconLibrary(randomIconLibrary.name)
+    if (randomStyle && randomIconLibrary) {
+      setStyle(randomStyle)
+      setIconLibrary(randomIconLibrary.name)
+    }
   }
 
   const handleReset = () => {

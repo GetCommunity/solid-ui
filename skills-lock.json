@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "formisch": {
+      "source": "open-circle/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/formisch/SKILL.md",
+      "computedHash": "087c39dfece92b6d7e340d47c842e65492a4ad4f8c787e942df4580226061c92"
+    },
+    "solid-js-2x-migration": {
+      "source": "doeixd/solid-skill",
+      "sourceType": "github",
+      "skillPath": "solid-js-2.x-migration/SKILL.md",
+      "computedHash": "0c686b7290143c9dcbed75e57a66f250968c1e28f1b64fefbf605fdefd4132e5"
+    },
+    "solidjs-v2": {
+      "source": "khmm12/solidjs-v2-skills",
+      "sourceType": "github",
+      "skillPath": "skills/solidjs-v2/SKILL.md",
+      "computedHash": "c8688c851b423e0c8df19fec75ccf8723b9e8f6f3def21b07a7858eca4f01365"
+    },
+    "tanstack-start": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-start/skills/tanstack-start/SKILL.md",
+      "computedHash": "e9d8355fe3e47b118e739081f1123c52aa0ecde57da840722177e1ad5caf9908"
+    },
+    "valibot": {
+      "source": "open-circle/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/valibot/SKILL.md",
+      "computedHash": "dc7ad7dc09548808d26aef0bc58786a4ee3559e153a1e83c9c4574f3a294ea1b"
+    }
+  }
+}

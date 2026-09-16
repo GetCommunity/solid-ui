@@ -3,12 +3,12 @@ import {
   children,
   createMemo,
   createSignal,
+  Loading,
+  omit,
   type ParentProps,
-  Show,
-  Suspense,
-  splitProps
+  Show
 } from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { Dynamic } from "@solidjs/web"
 
 import { getDocsExample } from "~/lib/docs-examples"
 import { cn } from "~/lib/utils"
@@ -32,7 +32,8 @@ type ComponentPreviewProps = ParentProps<{
 }>
 
 export function ComponentPreview(props: ComponentPreviewProps) {
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "name",
     "align",
     "class",
@@ -40,16 +41,16 @@ export function ComponentPreview(props: ComponentPreviewProps) {
     "hideCode",
     "contained",
     "children"
-  ])
+  )
   const [expanded, setExpanded] = createSignal(false)
-  const source = children(() => local.children)
-  const example = createMemo(() => getDocsExample(local.name))
+  const source = children(() => props.children)
+  const example = createMemo(() => getDocsExample(props.name))
 
   return (
     <div
       class={cn(
         "group relative mt-4 mb-12 flex flex-col overflow-hidden rounded-2xl border",
-        local.class
+        props.class
       )}
       data-not-typeset
       data-slot="component-preview"
@@ -58,33 +59,33 @@ export function ComponentPreview(props: ComponentPreviewProps) {
       <div
         class={cn(
           "preview relative flex min-h-72 w-full justify-center p-10 data-[align=start]:items-start data-[align=end]:items-end data-[align=center]:items-center",
-          local.contained && [
+          props.contained && [
             "overflow-hidden contain-layout",
             "[&_[data-slot=sidebar-container]]:h-full",
             "[&_[data-slot=sidebar-wrapper]]:h-full [&_[data-slot=sidebar-wrapper]]:min-h-0"
           ],
-          local.previewClass
+          props.previewClass
         )}
-        data-align={local.align ?? "center"}
+        data-align={props.align ?? "center"}
         data-slot="preview"
       >
         <Show
           fallback={
             <p class="text-muted-foreground text-sm">
-              Preview <code>{local.name}</code> was not found.
+              Preview <code>{props.name}</code> was not found.
             </p>
           }
           when={example()}
         >
           {(Example) => (
-            <Suspense>
+            <Loading>
               <Dynamic component={Example()} />
-            </Suspense>
+            </Loading>
           )}
         </Show>
       </div>
 
-      <Show when={!local.hideCode}>
+      <Show when={!props.hideCode}>
         <div
           class="relative overflow-hidden border-t bg-neutral-100 dark:bg-zinc-900 [&_.expressive-code]:mx-0 [&_.expressive-code]:mt-0 [&_.expressive-code_.frame_pre]:rounded-none"
           data-expanded={expanded()}
@@ -121,26 +122,26 @@ export function ComponentPreview(props: ComponentPreviewProps) {
 }
 
 export function ComponentSource(props: ParentProps<{ class?: string }>) {
-  const [local, others] = splitProps(props, ["class", "children"])
+  const others = omit(props, "class", "children")
   return (
     <div
-      class={cn("relative mt-6 [&_.expressive-code]:mt-0", local.class)}
+      class={cn("relative mt-6 [&_.expressive-code]:mt-0", props.class)}
       data-not-typeset
       data-slot="component-source"
       {...others}
     >
-      {local.children}
+      {props.children}
     </div>
   )
 }
 
 export function CodeTabs(props: ComponentProps<typeof Tabs>) {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <Tabs
       class={cn(
         "relative mt-6 w-full gap-2 [&>[data-slot=tabs-list]>[data-slot=tabs-trigger]]:rounded-none [&>[data-slot=tabs-list]>[data-slot=tabs-trigger]]:px-0 [&>[data-slot=tabs-list]>[data-slot=tabs-trigger]]:py-1 [&>[data-slot=tabs-list]]:gap-6 [&>[data-slot=tabs-list]]:p-0",
-        local.class
+        props.class
       )}
       data-not-typeset
       defaultValue="cli"

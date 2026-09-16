@@ -1,5 +1,5 @@
-import type { ValidComponent } from "solid-js"
-import { createMemo, For, mergeProps, splitProps } from "solid-js"
+import { createMemo, For, merge, omit } from "solid-js"
+import type { ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import * as SliderPrimitive from "@kobalte/core/slider"
@@ -13,34 +13,35 @@ type SliderProps<T extends ValidComponent = "div"> = SliderPrimitive.SliderRootP
 const Slider = <T extends ValidComponent = "div">(
   rawProps: PolymorphicProps<T, SliderProps<T>>
 ) => {
-  const props = mergeProps({ minValue: 0, maxValue: 100 }, rawProps)
-  const [local, others] = splitProps(props as SliderProps, [
+  const props = merge({ minValue: 0, maxValue: 100 }, rawProps)
+  const others = omit(
+    props as SliderProps,
     "class",
     "defaultValue",
     "value",
     "minValue",
     "maxValue"
-  ])
+  )
 
   const _values = createMemo(() =>
-    Array.isArray(local.value)
-      ? local.value
-      : Array.isArray(local.defaultValue)
-        ? local.defaultValue
-        : [local.minValue, local.maxValue]
+    Array.isArray(props.value)
+      ? props.value
+      : Array.isArray(props.defaultValue)
+        ? props.defaultValue
+        : [props.minValue, props.maxValue]
   )
 
   return (
     <SliderPrimitive.Root
       class={cn(
         "cn-slider relative flex w-full touch-none select-none items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col data-[disabled]:opacity-50",
-        local.class
+        props.class
       )}
       data-slot="slider"
-      defaultValue={local.defaultValue}
-      maxValue={local.maxValue}
-      minValue={local.minValue}
-      value={local.value}
+      defaultValue={props.defaultValue}
+      maxValue={props.maxValue}
+      minValue={props.minValue}
+      value={props.value}
       {...others}
     >
       <SliderPrimitive.Track

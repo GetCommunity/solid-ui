@@ -1,4 +1,4 @@
-import { Index } from "solid-js"
+import { For } from "solid-js"
 
 import { toast } from "solid-sonner"
 
@@ -45,7 +45,7 @@ export default function QuestionnaireProgressDemo() {
         {(state) => (
           <>
             <div aria-hidden="true" class="mb-2 flex gap-1.5">
-              <Index each={Array.from({ length: state.total })}>
+              <For each={Array.from({ length: state.total })} keyed={false}>
                 {(_, index) => (
                   <span
                     class={
@@ -55,7 +55,7 @@ export default function QuestionnaireProgressDemo() {
                     }
                   />
                 )}
-              </Index>
+              </For>
             </div>
             <span>
               Checkpoint {state.current} of {state.total}

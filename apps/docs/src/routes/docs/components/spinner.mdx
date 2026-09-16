@@ -53,21 +53,21 @@ You can replace the default spinner icon with any other icon by editing the `Spi
 
 ```tsx showLineNumbers title="components/ui/spinner.tsx"
 import { LoaderIcon } from "lucide-solid";
-import type { ComponentProps } from "solid-js";
-import { splitProps } from "solid-js";
+import { omit } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 import { cn } from "~/lib/utils";
 
-type SpinnerProps = ComponentProps<"svg">;
+type SpinnerProps = JSX.IntrinsicElements["svg"];
 
 const Spinner = (props: SpinnerProps) => {
-  const [local, others] = splitProps(props, ["class"]);
+  const others = omit(props, "class");
 
   return (
     <LoaderIcon
       role="status"
       aria-label="Loading"
-      class={cn("size-4 animate-spin", local.class)}
+      class={cn("size-4 animate-spin", props.class)}
       {...others}
     />
   );

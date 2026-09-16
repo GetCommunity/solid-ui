@@ -219,7 +219,7 @@ Use a signal and the `setApi` prop to get an instance of the carousel API.
 <ComponentPreview name="carousel-api" previewClass="sm:h-[32rem]" />
 
 ```tsx showLineNumbers {1,4,23}
-import { createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { type CarouselApi } from "~/components/ui/carousel";
 
 export function Example() {
@@ -227,8 +227,7 @@ export function Example() {
   const [current, setCurrent] = createSignal(0);
   const [count, setCount] = createSignal(0);
 
-  createEffect(() => {
-    const carouselApi = api();
+  createEffect(api, (carouselApi) => {
     if (!carouselApi) return;
 
     const onSelect = () => {
@@ -238,7 +237,7 @@ export function Example() {
     setCount(carouselApi.scrollSnapList().length);
     onSelect();
     carouselApi.on("select", onSelect);
-    onCleanup(() => carouselApi.off("select", onSelect));
+    return () => carouselApi.off("select", onSelect);
   });
 
   return (
@@ -258,14 +257,13 @@ export function Example() {
 Listen to events using the API instance from `setApi`.
 
 ```tsx showLineNumbers {1,4-17,19}
-import { createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { type CarouselApi } from "~/components/ui/carousel";
 
 export function Example() {
   const [api, setApi] = createSignal<CarouselApi>();
 
-  createEffect(() => {
-    const carouselApi = api();
+  createEffect(api, (carouselApi) => {
     if (!carouselApi) return;
 
     const onSelect = () => {
@@ -273,7 +271,7 @@ export function Example() {
     };
 
     carouselApi.on("select", onSelect);
-    onCleanup(() => carouselApi.off("select", onSelect));
+    return () => carouselApi.off("select", onSelect);
   });
 
   return (

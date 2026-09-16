@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js"
-import { Dynamic } from "solid-js/web"
+import { Dynamic } from "@solidjs/web"
 
 import type { LucideIcon } from "lucide-solid"
 import {

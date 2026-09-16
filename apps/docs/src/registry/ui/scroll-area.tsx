@@ -1,15 +1,14 @@
 import {
   type Accessor,
-  type ComponentProps,
   createContext,
   createSignal,
-  type JSX,
-  mergeProps,
+  merge,
+  omit,
   onCleanup,
-  onMount,
-  splitProps,
+  onSettled,
   useContext
 } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import { cn } from "~/lib/utils"
 
@@ -34,13 +33,13 @@ type ScrollAreaProps = ComponentProps<"div"> & {
 }
 
 const ScrollArea = (props: ScrollAreaProps) => {
-  const [local, others] = splitProps(props, ["class", "children", "onMouseEnter", "onMouseLeave"])
+  const others = omit(props, "class", "children", "onMouseEnter", "onMouseLeave")
 
   let viewportRef: HTMLDivElement | undefined
   const [hovered, setHovered] = createSignal(false)
 
   return (
-    <ScrollAreaContext.Provider
+    <ScrollAreaContext
       value={{
         viewportRef: () => viewportRef,
         contentRef: () => viewportRef,
@@ -49,15 +48,15 @@ const ScrollArea = (props: ScrollAreaProps) => {
     >
       {/* biome-ignore lint/a11y/noStaticElementInteractions: <hover tracking is a passive UI affordance — no keyboard equivalent needed since the inner viewport remains keyboard-scrollable> */}
       <div
-        class={cn("relative overflow-clip", local.class)}
+        class={cn("relative overflow-clip", props.class)}
         data-slot="scroll-area"
         onMouseEnter={(e) => {
           setHovered(true)
-          if (typeof local.onMouseEnter === "function") local.onMouseEnter(e)
+          if (typeof props.onMouseEnter === "function") props.onMouseEnter(e)
         }}
         onMouseLeave={(e) => {
           setHovered(false)
-          if (typeof local.onMouseLeave === "function") local.onMouseLeave(e)
+          if (typeof props.onMouseLeave === "function") props.onMouseLeave(e)
         }}
         {...others}
       >
@@ -66,12 +65,12 @@ const ScrollArea = (props: ScrollAreaProps) => {
           data-slot="scroll-area-viewport"
           ref={viewportRef}
         >
-          {local.children}
+          {props.children}
         </div>
         <ScrollBar />
         <div data-slot="scroll-area-corner" />
       </div>
-    </ScrollAreaContext.Provider>
+    </ScrollAreaContext>
   )
 }
 
@@ -80,8 +79,8 @@ type ScrollBarProps = ComponentProps<"div"> & {
 }
 
 const ScrollBar = (rawProps: ScrollBarProps) => {
-  const props = mergeProps({ orientation: "vertical" as const }, rawProps)
-  const [local, others] = splitProps(props, ["class", "orientation"])
+  const props = merge({ orientation: "vertical" as const }, rawProps)
+  const others = omit(props, "class", "orientation")
 
   const context = useScrollArea()
   const [thumbSize, setThumbSize] = createSignal(0)
@@ -93,7 +92,7 @@ const ScrollBar = (rawProps: ScrollBarProps) => {
   let scrollbarRef: HTMLDivElement | undefined
   let thumbRef: HTMLDivElement | undefined
 
-  const isVertical = () => local.orientation === "vertical"
+  const isVertical = () => props.orientation === "vertical"
 
   const updateScrollbar = () => {
     const viewport = context.viewportRef()
@@ -235,7 +234,7 @@ const ScrollBar = (rawProps: ScrollBarProps) => {
     }
   }
 
-  onMount(() => {
+  onSettled(() => {
     const viewport = context.viewportRef()
     if (!viewport) return
 
@@ -277,10 +276,10 @@ const ScrollBar = (rawProps: ScrollBarProps) => {
           "bottom-0 left-0 w-full": !isVertical(),
           "pointer-events-none opacity-0": !shown()
         },
-        local.class
+        props.class
       )}
       data-horizontal={!isVertical()}
-      data-orientation={local.orientation}
+      data-orientation={props.orientation}
       data-slot="scroll-area-scrollbar"
       data-vertical={isVertical()}
       onClick={handleTrackClick}

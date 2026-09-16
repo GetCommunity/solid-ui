@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router"
-
 import { CustomizerSheet } from "~/components/customizer-sheet"
 import { GitHubLink } from "~/components/github-link"
 import { IconLogo } from "~/components/icons"
@@ -15,7 +13,7 @@ export function SiteHeader() {
       <div class="container-wrapper px-6">
         <div class="**:data-[slot=separator]:!h-4 container m-auto flex h-(--header-height) items-center justify-between">
           <MobileNavigation />
-          <Button as={A} class="hidden size-8 lg:flex" href="/" size="icon" variant="ghost">
+          <Button as="a" class="hidden size-8 lg:flex" href="/" size="icon" variant="ghost">
             <IconLogo class="size-5" />
           </Button>
           <MainNav class="hidden lg:flex" />

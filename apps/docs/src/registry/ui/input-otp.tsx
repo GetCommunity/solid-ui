@@ -1,4 +1,5 @@
-import { type ComponentProps, Show, splitProps } from "solid-js"
+import { omit, Show } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import OtpField, { type RootProps as OtpFieldRootProps } from "@corvu/otp-field"
 import { Minus } from "lucide-solid"
@@ -17,7 +18,8 @@ type InputOTPProps = OtpFieldRootProps &
   }
 
 const InputOTP = (props: InputOTPProps) => {
-  const [local, others] = splitProps(props as InputOTPProps, [
+  const others = omit(
+    props as InputOTPProps,
     "class",
     "containerClass",
     "children",
@@ -27,27 +29,27 @@ const InputOTP = (props: InputOTPProps) => {
     "value",
     "onValueChange",
     "pattern"
-  ])
+  )
 
   return (
     <OtpField
-      class={cn("cn-input-otp flex items-center has-disabled:opacity-50", local.containerClass)}
+      class={cn("cn-input-otp flex items-center has-disabled:opacity-50", props.containerClass)}
       data-slot="input-otp"
       spellcheck={false}
       {...others}
     >
       <OtpField.Input
-        class={cn("cn-input-otp-input disabled:cursor-not-allowed", local.class)}
+        class={cn("cn-input-otp-input disabled:cursor-not-allowed", props.class)}
         data-slot="input-otp-input"
-        disabled={local.disabled}
-        id={local.id}
-        onChange={(e) => local.onValueChange?.(e.target.value)}
-        pattern={local.pattern}
-        required={local.required}
+        disabled={props.disabled}
+        id={props.id}
+        onChange={(e) => props.onValueChange?.(e.target.value)}
+        pattern={props.pattern}
+        required={props.required}
         spellcheck={false}
-        value={local.value}
+        value={props.value}
       />
-      {local.children}
+      {props.children}
     </OtpField>
   )
 }
@@ -55,10 +57,10 @@ const InputOTP = (props: InputOTPProps) => {
 type InputOTPGroupProps = ComponentProps<"div">
 
 const InputOTPGroup = (props: InputOTPGroupProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-input-otp-group flex items-center", local.class)}
+      class={cn("cn-input-otp-group flex items-center", props.class)}
       data-slot="input-otp-group"
       {...others}
     />
@@ -70,18 +72,18 @@ type InputOTPSlotProps = ComponentProps<"div"> & {
 }
 
 const InputOTPSlot = (props: InputOTPSlotProps) => {
-  const [local, others] = splitProps(props, ["index", "class"])
+  const others = omit(props, "index", "class")
   const context = OtpField.useContext()
 
-  const char = () => context.value()[local.index]
-  const isActive = () => context.activeSlots().includes(local.index)
+  const char = () => context.value()[props.index]
+  const isActive = () => context.activeSlots().includes(props.index)
   const showCaret = () => isActive() && context.isInserting()
 
   return (
     <div
       class={cn(
         "cn-input-otp-slot relative flex items-center justify-center data-[active=true]:z-10",
-        local.class
+        props.class
       )}
       data-active={isActive()}
       data-slot="input-otp-slot"
@@ -100,11 +102,11 @@ const InputOTPSlot = (props: InputOTPSlotProps) => {
 type InputOTPSeparatorProps = ComponentProps<"div">
 
 const InputOTPSeparator = (props: InputOTPSeparatorProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       aria-hidden="true"
-      class={cn("cn-input-otp-separator flex items-center", local.class)}
+      class={cn("cn-input-otp-separator flex items-center", props.class)}
       data-slot="input-otp-separator"
       {...others}
     >

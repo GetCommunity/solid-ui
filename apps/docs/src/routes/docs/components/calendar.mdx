@@ -93,18 +93,24 @@ Display ISO week numbers alongside the calendar using the `weekNumbers` prop:
 Use the `customCell` prop to add custom content to each day cell. This is useful for displaying metadata like prices, events, or availability indicators:
 
 ```tsx showLineNumbers
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { Calendar, type CustomCellProps } from "~/components/ui/calendar";
 
 const renderPriceCell = (props: CustomCellProps) => {
-  const price = getPriceForDate(props.date);
+  const price = createMemo(() => getPriceForDate(props.date));
 
   return (
-    <Show when={price !== null && !props.isOutsideMonth}>
+    <Show when={price() !== null && !props.isOutsideMonth}>
       <span
-        class={`text-[0.65rem] ${props.isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}
+        class={[
+          "text-[0.65rem]",
+          {
+            "text-primary-foreground/80": props.isSelected,
+            "text-muted-foreground": !props.isSelected,
+          },
+        ]}
       >
-        ${price}
+        ${price()}
       </span>
     </Show>
   );

@@ -1,15 +1,16 @@
-import type { Component, ComponentProps, JSX } from "solid-js"
 import {
+  type Component,
   createContext,
   createMemo,
   createUniqueId,
   For,
-  mergeProps,
+  merge,
+  omit,
   Show,
-  splitProps,
   useContext
 } from "solid-js"
-import { Dynamic } from "solid-js/web"
+import type { ComponentProps, JSX } from "@solidjs/web"
+import { Dynamic } from "@solidjs/web"
 
 import {
   type DefaultLegendContentProps,
@@ -61,39 +62,33 @@ export type ChartContainerProps = Omit<ComponentProps<"div">, "children"> & {
 
 function ChartContainer(props: ChartContainerProps) {
   const uniqueId = createUniqueId()
-  const [local, others] = splitProps(props, [
-    "id",
-    "class",
-    "children",
-    "config",
-    "initialDimension"
-  ])
-  const chartId = () => `chart-${local.id ?? uniqueId.replace(/:/g, "")}`
+  const others = omit(props, "id", "class", "children", "config", "initialDimension")
+  const chartId = () => `chart-${props.id ?? uniqueId.replace(/:/g, "")}`
 
   return (
-    <ChartContext.Provider
+    <ChartContext
       value={{
         get config() {
-          return local.config
+          return props.config
         }
       }}
     >
       <div
         class={cn(
           "cn-chart flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
-          local.class
+          props.class
         )}
         data-chart={chartId()}
         data-slot="chart"
         {...others}
       >
-        <ChartStyle config={local.config} id={chartId()} />
+        <ChartStyle config={props.config} id={chartId()} />
         {/* A fixed default initial size leaves unclaimed chart nodes during SSR hydration. */}
-        <ResponsiveContainer initialDimension={local.initialDimension}>
-          {local.children}
+        <ResponsiveContainer initialDimension={props.initialDimension}>
+          {props.children}
         </ResponsiveContainer>
       </div>
-    </ChartContext.Provider>
+    </ChartContext>
   )
 }
 
@@ -151,7 +146,7 @@ export type ChartTooltipContentProps = Partial<TooltipContentProps> &
 
 function ChartTooltipContent(props: ChartTooltipContentProps) {
   const chart = useChart()
-  const mergedProps = mergeProps(
+  const mergedProps = merge(
     {
       indicator: "dot" as const,
       hideLabel: false,
@@ -313,7 +308,7 @@ export type ChartLegendContentProps = DefaultLegendContentProps &
   Omit<ComponentProps<"div">, keyof DefaultLegendContentProps> & {
     hideIcon?: boolean
     nameKey?: string
-    payload?: ReadonlyArray<LegendPayload>
+    payload?: readonly LegendPayload[]
     verticalAlign?: "top" | "middle" | "bottom"
   }
 

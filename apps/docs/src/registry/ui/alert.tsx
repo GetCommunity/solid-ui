@@ -1,5 +1,5 @@
-import type { ComponentProps, ValidComponent } from "solid-js"
-import { splitProps } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -24,10 +24,10 @@ type AlertProps<T extends ValidComponent = "div"> = ComponentProps<T> &
   }
 
 const Alert = <T extends ValidComponent = "div">(props: PolymorphicProps<T, AlertProps<T>>) => {
-  const [local, others] = splitProps(props as AlertProps, ["class", "variant"])
+  const others = omit(props as AlertProps, "class", "variant")
   return (
     <div
-      class={cn(alertVariants({ variant: local.variant }), local.class)}
+      class={cn(alertVariants({ variant: props.variant }), props.class)}
       data-slot="alert"
       role="alert"
       {...others}
@@ -42,12 +42,12 @@ type AlertTitleProps<T extends ValidComponent = "div"> = ComponentProps<T> & {
 const AlertTitle = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, AlertTitleProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AlertTitleProps, ["class"])
+  const others = omit(props as AlertTitleProps, "class")
   return (
     <div
       class={cn(
         "cn-alert-title [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
-        local.class
+        props.class
       )}
       data-slot="alert-title"
       {...others}
@@ -62,12 +62,12 @@ type AlertDescriptionProps<T extends ValidComponent = "div"> = ComponentProps<T>
 const AlertDescription = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, AlertDescriptionProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AlertDescriptionProps, ["class"])
+  const others = omit(props as AlertDescriptionProps, "class")
   return (
     <div
       class={cn(
         "cn-alert-description [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
-        local.class
+        props.class
       )}
       data-slot="alert-description"
       {...others}
@@ -82,8 +82,8 @@ type AlertActionProps<T extends ValidComponent = "div"> = ComponentProps<T> & {
 const AlertAction = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, AlertActionProps<T>>
 ) => {
-  const [local, others] = splitProps(props as AlertActionProps, ["class"])
-  return <div class={cn("cn-alert-action", local.class)} data-slot="alert-action" {...others} />
+  const others = omit(props as AlertActionProps, "class")
+  return <div class={cn("cn-alert-action", props.class)} data-slot="alert-action" {...others} />
 }
 
 export { Alert, AlertAction, AlertDescription, AlertTitle, alertVariants }

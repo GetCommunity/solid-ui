@@ -21,7 +21,7 @@ export default function SelectInvalid() {
         placeholder="Select a fruit"
         validationState="invalid"
       >
-        <SelectTrigger aria-invalid id="invalid-fruit">
+        <SelectTrigger aria-invalid="true" id="invalid-fruit">
           <SelectValue<(typeof items)[number]>>
             {(state) => state.selectedOption().label}
           </SelectValue>

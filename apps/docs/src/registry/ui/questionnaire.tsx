@@ -1,5 +1,5 @@
-import type { JSX } from "solid-js"
-import { createEffect, createUniqueId, onCleanup, splitProps } from "solid-js"
+import { createUniqueId, omit, onCleanup } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { Check } from "lucide-solid"
 
@@ -40,50 +40,51 @@ import {
 import { buttonVariants } from "~/registry/ui/button"
 
 const QuestionnaireRoot = (props: QuestionnaireRootProps) => {
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "children",
     "class",
     "defaultItem",
     "item",
     "items",
-    "noValidate",
+    "novalidate",
     "onItemChange",
     "onKeyDown",
     "onReset",
     "onSubmit",
     "ref",
     "shortcuts"
-  ])
+  )
 
-  const { context, rootProps } = createQuestionnaireRoot(local)
+  const { context, rootProps } = createQuestionnaireRoot(props)
 
   return (
-    <QuestionnaireContext.Provider value={context}>
+    <QuestionnaireContext value={context}>
       <form
-        class={cn("cn-questionnaire flex w-full min-w-0 flex-col", local.class)}
+        class={cn("cn-questionnaire flex w-full min-w-0 flex-col", props.class)}
         data-current={context.current}
         data-first={context.first ? "" : undefined}
         data-last={context.last ? "" : undefined}
-        data-shortcuts={local.shortcuts}
+        data-shortcuts={props.shortcuts}
         data-slot="questionnaire"
         data-total={context.total}
-        noValidate={local.noValidate ?? true}
+        novalidate={props.novalidate ?? true}
         {...rootProps}
         {...others}
       >
-        {local.children}
+        {props.children}
       </form>
-    </QuestionnaireContext.Provider>
+    </QuestionnaireContext>
   )
 }
 
 const QuestionnaireProgress = (props: QuestionnaireProgressProps) => {
   const context = useQuestionnaireContext("QuestionnaireProgress")
-  const [local, others] = splitProps(props, ["children", "class"])
+  const others = omit(props, "children", "class")
   const label = () =>
     context.total ? `Question ${context.current} of ${context.total}` : undefined
   const content = () => {
-    const children = local.children
+    const children = props.children
 
     if (typeof children === "function") {
       return children({
@@ -107,7 +108,7 @@ const QuestionnaireProgress = (props: QuestionnaireProgressProps) => {
       aria-valuetext={label()}
       class={cn(
         "cn-questionnaire-progress min-h-lh w-fit min-w-[14ch] text-left font-medium text-muted-foreground tabular-nums",
-        local.class
+        props.class
       )}
       data-current={context.current}
       data-first={context.first ? "" : undefined}
@@ -123,7 +124,8 @@ const QuestionnaireProgress = (props: QuestionnaireProgressProps) => {
 }
 
 const QuestionnaireItem = (props: QuestionnaireItemProps) => {
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "aria-describedby",
     "aria-keyshortcuts",
     "children",
@@ -135,14 +137,14 @@ const QuestionnaireItem = (props: QuestionnaireItemProps) => {
     "onStatusChange",
     "ref",
     "required"
-  ])
+  )
 
-  const { context, itemProps, state } = createQuestionnaireItem(local)
+  const { context, itemProps, state } = createQuestionnaireItem(props)
 
   return (
-    <QuestionnaireItemContext.Provider value={context}>
+    <QuestionnaireItemContext value={context}>
       <fieldset
-        class={cn("cn-questionnaire-item min-w-0 border-0 p-0 outline-none", local.class)}
+        class={cn("cn-questionnaire-item min-w-0 border-0 p-0 outline-none", props.class)}
         data-active={state.active ? "" : undefined}
         data-disabled={state.disabled ? "" : undefined}
         data-invalid={state.invalid ? "" : undefined}
@@ -153,19 +155,19 @@ const QuestionnaireItem = (props: QuestionnaireItemProps) => {
         {...itemProps}
         {...others}
       >
-        {local.children}
+        {props.children}
       </fieldset>
-    </QuestionnaireItemContext.Provider>
+    </QuestionnaireItemContext>
   )
 }
 
 const QuestionnaireTitle = (props: QuestionnaireTitleProps) => {
   useQuestionnaireItemContext("QuestionnaireTitle")
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <legend
-      class={cn("cn-questionnaire-title z-font-heading text-pretty text-left", local.class)}
+      class={cn("cn-questionnaire-title z-font-heading text-pretty text-left", props.class)}
       data-slot="questionnaire-title"
       {...others}
     />
@@ -174,19 +176,17 @@ const QuestionnaireTitle = (props: QuestionnaireTitleProps) => {
 
 const QuestionnaireDescription = (props: QuestionnaireDescriptionProps) => {
   const itemContext = useQuestionnaireItemContext("QuestionnaireDescription")
-  const [local, others] = splitProps(props, ["class", "id"])
+  const others = omit(props, "class", "id")
   const generatedId = createUniqueId()
-  const descriptionId = () => local.id ?? generatedId
+  const descriptionId = () => (props.id ? String(props.id) : generatedId)
 
-  createEffect(() => {
-    onCleanup(itemContext.registerDescription(descriptionId()))
-  })
+  onCleanup(itemContext.registerDescription(descriptionId()))
 
   return (
     <p
       class={cn(
         "cn-questionnaire-description text-pretty text-left text-muted-foreground",
-        local.class
+        props.class
       )}
       data-slot="questionnaire-description"
       id={descriptionId()}
@@ -197,11 +197,11 @@ const QuestionnaireDescription = (props: QuestionnaireDescriptionProps) => {
 
 const QuestionnaireChoices = (props: QuestionnaireChoicesProps) => {
   const itemContext = useQuestionnaireItemContext("QuestionnaireChoices")
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <div
-      class={cn("group/questionnaire-choices cn-questionnaire-choices grid min-w-0", local.class)}
+      class={cn("group/questionnaire-choices cn-questionnaire-choices grid min-w-0", props.class)}
       data-shortcuts={itemContext.shortcuts ?? undefined}
       data-slot="questionnaire-choices"
       {...others}
@@ -210,7 +210,8 @@ const QuestionnaireChoices = (props: QuestionnaireChoicesProps) => {
 }
 
 const QuestionnaireChoice = (props: QuestionnaireChoiceProps) => {
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "checked",
     "children",
     "class",
@@ -218,19 +219,18 @@ const QuestionnaireChoice = (props: QuestionnaireChoiceProps) => {
     "disabled",
     "onChange",
     "value"
-  ])
+  )
 
-  const choiceContext = createQuestionnaireChoice(local)
+  const choiceContext = createQuestionnaireChoice(props)
   const state = choiceContext.state
 
   return (
-    <QuestionnaireChoiceContext.Provider value={choiceContext}>
-      {/* biome-ignore lint/a11y/noLabelWithoutControl: QuestionnaireChoiceInput renders the native input inside the label. */}
+    <QuestionnaireChoiceContext value={choiceContext}>
       <label
         class={cn(
           "group/questionnaire-choice cn-questionnaire-choice relative flex min-h-11 cursor-pointer select-none items-start text-start outline-none transition-colors",
           "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50",
-          local.class
+          props.class
         )}
         data-checked={state.checked ? "" : undefined}
         data-disabled={state.disabled ? "" : undefined}
@@ -256,24 +256,24 @@ const QuestionnaireChoice = (props: QuestionnaireChoiceProps) => {
             data-slot="questionnaire-choice-indicator-check"
           />
         </span>
-        <QuestionnaireChoiceLabel>{local.children}</QuestionnaireChoiceLabel>
+        <QuestionnaireChoiceLabel>{props.children}</QuestionnaireChoiceLabel>
         <QuestionnaireChoiceShortcut />
       </label>
-    </QuestionnaireChoiceContext.Provider>
+    </QuestionnaireChoiceContext>
   )
 }
 
 const QuestionnaireChoiceInput = (props: QuestionnaireChoiceInputProps) => {
   const choiceContext = useQuestionnaireChoiceContext("QuestionnaireChoiceInput")
-  const [local, others] = splitProps(props, ["class", "ref"])
-  const [inputRef, inputProps] = splitProps(choiceContext.inputProps, ["ref"])
+  const others = omit(props, "class", "ref")
+  const inputProps = omit(choiceContext.inputProps, "ref")
   const state = choiceContext.state
 
   return (
     <input
       class={cn(
         "cn-questionnaire-choice-input absolute inset-0 z-10 size-full cursor-pointer opacity-0",
-        local.class
+        props.class
       )}
       data-checked={state.checked ? "" : undefined}
       data-disabled={state.disabled ? "" : undefined}
@@ -285,8 +285,8 @@ const QuestionnaireChoiceInput = (props: QuestionnaireChoiceInputProps) => {
       {...inputProps}
       {...others}
       ref={(element) => {
-        inputRef.ref(element)
-        local.ref?.(element)
+        choiceContext.inputProps.ref(element)
+        props.ref?.(element)
       }}
     />
   )
@@ -294,13 +294,13 @@ const QuestionnaireChoiceInput = (props: QuestionnaireChoiceInputProps) => {
 
 const QuestionnaireChoiceLabel = (props: QuestionnaireChoiceLabelProps) => {
   useQuestionnaireChoiceContext("QuestionnaireChoiceLabel")
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <span
       class={cn(
         "cn-questionnaire-choice-content cn-questionnaire-choice-label flex min-w-0 flex-1 flex-col leading-snug",
-        local.class
+        props.class
       )}
       data-slot="questionnaire-choice-label"
       {...others}
@@ -310,31 +310,31 @@ const QuestionnaireChoiceLabel = (props: QuestionnaireChoiceLabelProps) => {
 
 const QuestionnaireChoiceShortcut = (props: QuestionnaireChoiceShortcutProps) => {
   const choiceContext = useQuestionnaireChoiceContext("QuestionnaireChoiceShortcut")
-  const [local, others] = splitProps(props, ["children", "class"])
+  const others = omit(props, "children", "class")
 
   return (
     <span
       aria-hidden="true"
       class={cn(
         "cn-questionnaire-choice-shortcut cn-questionnaire-shortcut pointer-events-none ms-auto hidden shrink-0 group-data-shortcut/questionnaire-choice:inline-flex",
-        local.class
+        props.class
       )}
       data-shortcut={choiceContext.state.shortcut ?? undefined}
       data-slot="questionnaire-choice-shortcut"
       hidden={choiceContext.state.shortcut === null}
       {...others}
     >
-      {local.children ?? choiceContext.state.shortcut}
+      {props.children ?? choiceContext.state.shortcut}
     </span>
   )
 }
 
 const QuestionnaireChoiceDescription = (props: QuestionnaireChoiceDescriptionProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <span
-      class={cn("cn-questionnaire-choice-description", local.class)}
+      class={cn("cn-questionnaire-choice-description", props.class)}
       data-slot="questionnaire-choice-description"
       {...others}
     />
@@ -342,17 +342,9 @@ const QuestionnaireChoiceDescription = (props: QuestionnaireChoiceDescriptionPro
 }
 
 const QuestionnaireInput = (props: QuestionnaireInputProps) => {
-  const [local, others] = splitProps(props, [
-    "class",
-    "defaultValue",
-    "disabled",
-    "onInput",
-    "ref",
-    "type",
-    "value"
-  ])
+  const others = omit(props, "class", "defaultValue", "disabled", "onInput", "ref", "type", "value")
 
-  const { inputProps, state } = createQuestionnaireInput(local)
+  const { inputProps, state } = createQuestionnaireInput(props)
 
   return (
     <div
@@ -363,7 +355,7 @@ const QuestionnaireInput = (props: QuestionnaireInputProps) => {
         class={cn(
           "cn-questionnaire-input min-h-11 w-full min-w-0 outline-none transition-[color,box-shadow,background-color] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0",
           "selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground",
-          local.class
+          props.class
         )}
         data-disabled={state.disabled ? "" : undefined}
         data-empty={state.filled ? undefined : ""}
@@ -379,17 +371,15 @@ const QuestionnaireInput = (props: QuestionnaireInputProps) => {
 
 const QuestionnaireError = (props: QuestionnaireErrorProps) => {
   const itemContext = useQuestionnaireItemContext("QuestionnaireError")
-  const [local, others] = splitProps(props, ["children", "class", "id"])
+  const others = omit(props, "children", "class", "id")
   const generatedId = createUniqueId()
-  const errorId = () => local.id ?? generatedId
+  const errorId = () => (props.id ? String(props.id) : generatedId)
 
-  createEffect(() => {
-    onCleanup(itemContext.registerError(errorId()))
-  })
+  onCleanup(itemContext.registerError(errorId()))
 
   return (
     <p
-      class={cn("cn-questionnaire-error text-destructive", local.class)}
+      class={cn("cn-questionnaire-error text-destructive", props.class)}
       data-invalid={itemContext.invalid ? "" : undefined}
       data-slot="questionnaire-error"
       hidden={!itemContext.invalid}
@@ -397,7 +387,7 @@ const QuestionnaireError = (props: QuestionnaireErrorProps) => {
       role={itemContext.invalid ? "alert" : undefined}
       {...others}
     >
-      {local.children ??
+      {props.children ??
         (itemContext.required
           ? "Choose an answer to continue."
           : "Choose an answer or skip this question.")}
@@ -406,13 +396,13 @@ const QuestionnaireError = (props: QuestionnaireErrorProps) => {
 }
 
 const QuestionnaireActions = (props: QuestionnaireActionsProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <div
       class={cn(
         "cn-questionnaire-actions grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center",
-        local.class
+        props.class
       )}
       data-slot="questionnaire-actions"
       {...others}
@@ -430,7 +420,8 @@ type QuestionnaireNavigationButtonProps = QuestionnaireNavigationProps & {
 
 const QuestionnaireNavigationButton = (props: QuestionnaireNavigationButtonProps) => {
   const context = useQuestionnaireContext("QuestionnaireNavigationButton")
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "children",
     "class",
     "defaultChildren",
@@ -439,54 +430,54 @@ const QuestionnaireNavigationButton = (props: QuestionnaireNavigationButtonProps
     "shortcut",
     "size",
     "slotName",
-    "tabIndex",
+    "tabindex",
     "type",
     "variant",
     "visible"
-  ])
+  )
 
-  const disabled = () => local.disabled ?? false
-  const activeShortcut = () => (local.visible && !disabled() ? (local.shortcut ?? null) : null)
+  const disabled = () => props.disabled ?? false
+  const activeShortcut = () => (props.visible && !disabled() ? (props.shortcut ?? null) : null)
 
   return (
     <button
-      aria-hidden={!local.visible || undefined}
+      aria-hidden={!props.visible ? "true" : "false"}
       aria-keyshortcuts={activeShortcut() ?? undefined}
       class={cn(
         buttonVariants({
-          size: local.size ?? "default",
-          variant: local.variant ?? "default"
+          size: props.size ?? "default",
+          variant: props.variant ?? "default"
         }),
-        local.navigationClass,
-        local.class
+        props.navigationClass,
+        props.class
       )}
       data-disabled={disabled() ? "" : undefined}
-      data-hidden={local.visible ? undefined : ""}
+      data-hidden={props.visible ? undefined : ""}
       data-shortcut={activeShortcut() ?? undefined}
-      data-size={local.size ?? "default"}
-      data-slot={local.slotName}
+      data-size={props.size ?? "default"}
+      data-slot={props.slotName}
       data-status={context.activeItemStatus ?? undefined}
-      data-variant={local.variant ?? "default"}
-      data-visible={local.visible ? "" : undefined}
+      data-variant={props.variant ?? "default"}
+      data-visible={props.visible ? "" : undefined}
       disabled={disabled()}
-      hidden={!local.visible}
-      inert={!local.visible}
-      tabIndex={local.visible ? local.tabIndex : -1}
-      type={local.type ?? "button"}
+      hidden={!props.visible}
+      inert={!props.visible}
+      tabindex={props.visible ? props.tabindex : -1}
+      type={props.type ?? "button"}
       {...others}
     >
-      {local.children ?? local.defaultChildren}
+      {props.children ?? props.defaultChildren}
     </button>
   )
 }
 
 const QuestionnairePrevious = (props: QuestionnairePreviousProps) => {
   const context = useQuestionnaireContext("QuestionnairePrevious")
-  const [local, others] = splitProps(props, ["onClick", "variant"])
+  const others = omit(props, "onClick", "variant")
 
   const handleClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (event) => {
-    if (typeof local.onClick === "function") {
-      local.onClick(event)
+    if (typeof props.onClick === "function") {
+      props.onClick(event)
     }
 
     if (!event.defaultPrevented) {
@@ -500,7 +491,7 @@ const QuestionnairePrevious = (props: QuestionnairePreviousProps) => {
       navigationClass="cn-questionnaire-previous col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0"
       onClick={handleClick}
       slotName="questionnaire-previous"
-      variant={local.variant ?? "outline"}
+      variant={props.variant ?? "outline"}
       visible={context.total > 1 && !context.first}
       {...others}
     />
@@ -509,11 +500,11 @@ const QuestionnairePrevious = (props: QuestionnairePreviousProps) => {
 
 const QuestionnaireSkip = (props: QuestionnaireSkipProps) => {
   const context = useQuestionnaireContext("QuestionnaireSkip")
-  const [local, others] = splitProps(props, ["onClick", "variant"])
+  const others = omit(props, "onClick", "variant")
 
   const handleClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (event) => {
-    if (typeof local.onClick === "function") {
-      local.onClick(event)
+    if (typeof props.onClick === "function") {
+      props.onClick(event)
     }
 
     if (!event.defaultPrevented) {
@@ -527,7 +518,7 @@ const QuestionnaireSkip = (props: QuestionnaireSkipProps) => {
       navigationClass="cn-questionnaire-skip col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0"
       onClick={handleClick}
       slotName="questionnaire-skip"
-      variant={local.variant ?? "outline"}
+      variant={props.variant ?? "outline"}
       visible={context.activeItemRequired === false}
       {...others}
     />
@@ -536,11 +527,11 @@ const QuestionnaireSkip = (props: QuestionnaireSkipProps) => {
 
 const QuestionnaireNext = (props: QuestionnaireNextProps) => {
   const context = useQuestionnaireContext("QuestionnaireNext")
-  const [local, others] = splitProps(props, ["onClick"])
+  const others = omit(props, "onClick")
 
   const handleClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (event) => {
-    if (typeof local.onClick === "function") {
-      local.onClick(event)
+    if (typeof props.onClick === "function") {
+      props.onClick(event)
     }
 
     if (!event.defaultPrevented) {
@@ -563,7 +554,7 @@ const QuestionnaireNext = (props: QuestionnaireNextProps) => {
 
 const QuestionnaireSubmit = (props: QuestionnaireSubmitProps) => {
   const context = useQuestionnaireContext("QuestionnaireSubmit")
-  const [local, others] = splitProps(props, ["type"])
+  const others = omit(props, "type")
 
   return (
     <QuestionnaireNavigationButton
@@ -571,7 +562,7 @@ const QuestionnaireSubmit = (props: QuestionnaireSubmitProps) => {
       navigationClass="cn-questionnaire-submit col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0"
       shortcut="Enter"
       slotName="questionnaire-submit"
-      type={local.type ?? "submit"}
+      type={props.type ?? "submit"}
       visible={context.total > 0 && context.last}
       {...others}
     />

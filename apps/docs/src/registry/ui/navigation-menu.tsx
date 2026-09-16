@@ -1,5 +1,5 @@
-import type { ComponentProps, JSX, ValidComponent } from "solid-js"
-import { mergeProps, splitProps } from "solid-js"
+import { merge, omit } from "solid-js"
+import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web"
 
 import {
   Content,
@@ -12,7 +12,7 @@ import {
   Trigger,
   Viewport
 } from "@kobalte/core/navigation-menu"
-import type { PolymorphicProps } from "@kobalte/core/polymorphic"
+import { Polymorphic, type PolymorphicProps } from "@kobalte/core/polymorphic"
 import { cva } from "class-variance-authority"
 import { ChevronDown } from "lucide-solid"
 
@@ -25,13 +25,13 @@ type NavigationMenuProps<T extends ValidComponent = "ul"> = PolymorphicProps<
   Pick<ComponentProps<T>, "class" | "children">
 
 const NavigationMenu = <T extends ValidComponent = "ul">(props: NavigationMenuProps<T>) => {
-  const mergedProps = mergeProps({ gutter: 8, placement: "bottom-start" }, props)
-  const [local, others] = splitProps(mergedProps as NavigationMenuProps, ["class", "children"])
+  const mergedProps = merge({ gutter: 8, placement: "bottom-start" }, props)
+  const others = omit(mergedProps as NavigationMenuProps, "class", "children")
   return (
     <Root
       class={cn(
         "group/navigation-menu cn-navigation-menu relative flex max-w-max flex-1 items-center justify-center",
-        local.class
+        props.class
       )}
       data-slot="navigation-menu"
       {...others}
@@ -40,7 +40,7 @@ const NavigationMenu = <T extends ValidComponent = "ul">(props: NavigationMenuPr
         class="group cn-navigation-menu-list flex flex-1 list-none items-center justify-center"
         data-slot="navigation-menu-list"
       >
-        {local.children}
+        {props.children}
       </div>
       <Viewport class="origin-(--kb-menu-content-transform-origin)" />
     </Root>
@@ -50,11 +50,11 @@ const NavigationMenu = <T extends ValidComponent = "ul">(props: NavigationMenuPr
 type NavigationMenuItemProps = ComponentProps<"div">
 
 const NavigationMenuItem = (props: NavigationMenuItemProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <Menu>
       <div
-        class={cn("cn-navigation-menu-item relative", local.class)}
+        class={cn("cn-navigation-menu-item relative", props.class)}
         data-slot="navigation-menu-item"
         {...others}
       />
@@ -75,14 +75,14 @@ type NavigationMenuTriggerProps<T extends ValidComponent = "div"> = PolymorphicP
 const NavigationMenuTrigger = <T extends ValidComponent = "div">(
   props: NavigationMenuTriggerProps<T>
 ) => {
-  const [local, others] = splitProps(props as NavigationMenuTriggerProps, ["class", "children"])
+  const others = omit(props as NavigationMenuTriggerProps, "class", "children")
   return (
     <Trigger
-      class={cn(navigationMenuTriggerStyle(), "group", local.class)}
+      class={cn(navigationMenuTriggerStyle(), "group", props.class)}
       data-slot="navigation-menu-trigger"
       {...others}
     >
-      {local.children}
+      {props.children}
       <ChevronDown aria-hidden="true" class="cn-navigation-menu-trigger-icon" />
     </Trigger>
   )
@@ -97,13 +97,13 @@ type NavigationMenuContentProps<T extends ValidComponent = "ul"> = PolymorphicPr
 const NavigationMenuContent = <T extends ValidComponent = "ul">(
   props: NavigationMenuContentProps<T>
 ) => {
-  const [local, others] = splitProps(props as NavigationMenuContentProps, ["class"])
+  const others = omit(props as NavigationMenuContentProps, "class")
   return (
     <Portal>
       <Content
         class={cn(
           "cn-navigation-menu-content absolute top-0 h-full w-auto origin-(--kb-menu-content-transform-origin) **:data-[slot=navigation-menu-link]:focus:outline-none **:data-[slot=navigation-menu-link]:focus:ring-0",
-          local.class
+          props.class
         )}
         data-slot="navigation-menu-content"
         {...others}
@@ -112,16 +112,20 @@ const NavigationMenuContent = <T extends ValidComponent = "ul">(
   )
 }
 
-type NavigationMenuLinkProps = ComponentProps<"a"> & {
+type NavigationMenuLinkProps<T extends ValidComponent = "a"> = ComponentProps<T> & {
   class?: string
   children?: JSX.Element
 }
 
-const NavigationMenuLink = (props: NavigationMenuLinkProps) => {
-  const [local, others] = splitProps(props, ["class"])
+const NavigationMenuLink = <T extends ValidComponent = "a">(
+  props: PolymorphicProps<T, NavigationMenuLinkProps>
+) => {
+  const mergedProps = merge({ as: "a" }, props)
+  const others = omit(props, "class")
   return (
-    <a
-      class={cn("cn-navigation-menu-link", local.class)}
+    <Polymorphic
+      as={mergedProps.as}
+      class={cn("cn-navigation-menu-link", props.class)}
       data-slot="navigation-menu-link"
       {...others}
     />
@@ -133,12 +137,12 @@ type NavigationMenuIndicatorProps = ComponentProps<"div"> & {
 }
 
 const NavigationMenuIndicator = (props: NavigationMenuIndicatorProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "cn-navigation-menu-indicator top-full z-1 flex h-1.5 items-end justify-center overflow-hidden",
-        local.class
+        props.class
       )}
       data-slot="navigation-menu-indicator"
       {...others}

@@ -70,7 +70,7 @@ export default function ChartDemo() {
           <For each={["desktop", "mobile"] as const}>
             {(chart) => (
               <button
-                aria-pressed={activeChart() === chart}
+                aria-pressed={activeChart() === chart && "true"}
                 class="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 data-active={String(activeChart() === chart)}
                 onClick={() => setActiveChart(chart)}

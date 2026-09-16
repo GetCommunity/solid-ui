@@ -1,4 +1,5 @@
-import { splitProps, type ValidComponent } from "solid-js"
+import { omit } from "solid-js"
+import type { ValidComponent } from "@solidjs/web"
 
 import { type BadgeRootProps, Root } from "@kobalte/core/badge"
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
@@ -39,12 +40,12 @@ type BadgeProps<T extends ValidComponent = "span"> = PolymorphicProps<T, BadgeRo
   VariantProps<typeof badgeVariants>
 
 const Badge = <T extends ValidComponent = "span">(props: BadgeProps<T>) => {
-  const [local, others] = splitProps(props as BadgeProps, ["class", "variant"])
+  const others = omit(props as BadgeProps, "class", "variant")
   return (
     <Root
-      class={cn(badgeVariants({ variant: local.variant }), local.class)}
+      class={cn(badgeVariants({ variant: props.variant }), props.class)}
       data-slot="badge"
-      data-variant={local.variant ?? "default"}
+      data-variant={props.variant ?? "default"}
       {...others}
     />
   )

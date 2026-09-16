@@ -1,5 +1,5 @@
-import type { JSX, ValidComponent } from "solid-js"
-import { type Component, splitProps } from "solid-js"
+import { type Component, omit } from "solid-js"
+import type { JSX, ValidComponent } from "@solidjs/web"
 
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 import * as TooltipPrimitive from "@kobalte/core/tooltip"
@@ -20,19 +20,19 @@ type TooltipContentProps<T extends ValidComponent = "div"> =
 const TooltipContent = <T extends ValidComponent = "div">(
   props: PolymorphicProps<T, TooltipContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as TooltipContentProps, ["class", "children"])
+  const others = omit(props as TooltipContentProps, "class", "children")
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         class={cn(
           "fade-in-0 zoom-in-95 data-[closed]:fade-out-0 data-[closed]:zoom-out-95 z-50 w-fit origin-(--kb-popover-content-transform-origin) animate-in text-balance rounded-md bg-foreground px-3 py-1.5 text-background text-xs data-[closed]:animate-out",
-          local.class
+          props.class
         )}
         data-slot="tooltip-content"
         {...others}
       >
         <TooltipPrimitive.Arrow />
-        {local.children}
+        {props.children}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

@@ -1,22 +1,17 @@
-// import {
-//   CircleAlertIcon,
-//   CircleCheckIcon,
-//   CircleDashedIcon,
-// } from "lucide-solid"
+// import { For, omit } from "solid-js"
+// import type { ComponentProps } from "@solidjs/web"
 
-// import {
-//   useTranslation,
-//   type Translations,
-// } from "~/registry/language-selector"
+// import { CircleAlertIcon, CircleCheckIcon, CircleDashedIcon } from "lucide-solid"
+
+// import { type Translations, useTranslation } from "~/registry/language-selector"
 // import {
 //   NavigationMenu,
 //   NavigationMenuContent,
 //   NavigationMenuItem,
 //   NavigationMenuLink,
 //   NavigationMenuTrigger,
-//   navigationMenuTriggerStyle,
+//   navigationMenuTriggerStyle
 // } from "~/registry/ui/navigation-menu"
-// import { For, splitProps, type ComponentProps } from "solid-js"
 
 // const translations: Translations = {
 //   en: {
@@ -34,8 +29,7 @@
 //       alertDialogDesc:
 //         "A modal dialog that interrupts the user with important content and expects a response.",
 //       hoverCard: "Hover Card",
-//       hoverCardDesc:
-//         "For sighted users to preview content available behind a link.",
+//       hoverCardDesc: "For sighted users to preview content available behind a link.",
 //       progress: "Progress",
 //       progressDesc:
 //         "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
@@ -51,16 +45,15 @@
 //       backlog: "Backlog",
 //       toDo: "To Do",
 //       done: "Done",
-//       docs: "Docs",
-//     },
+//       docs: "Docs"
+//     }
 //   },
 //   ar: {
 //     dir: "rtl",
 //     values: {
 //       gettingStarted: "البدء",
 //       introduction: "مقدمة",
-//       introductionDesc:
-//         "مكونات قابلة لإعادة الاستخدام مبنية باستخدام Tailwind CSS.",
+//       introductionDesc: "مكونات قابلة لإعادة الاستخدام مبنية باستخدام Tailwind CSS.",
 //       installation: "التثبيت",
 //       installationDesc: "كيفية تثبيت التبعيات وتنظيم تطبيقك.",
 //       typography: "الطباعة",
@@ -71,8 +64,7 @@
 //       hoverCard: "بطاقة التحويم",
 //       hoverCardDesc: "للمستخدمين المبصرين لمعاينة المحتوى المتاح خلف الرابط.",
 //       progress: "التقدم",
-//       progressDesc:
-//         "يعرض مؤشرًا يوضح تقدم إتمام المهمة، عادةً يتم عرضه كشريط تقدم.",
+//       progressDesc: "يعرض مؤشرًا يوضح تقدم إتمام المهمة، عادةً يتم عرضه كشريط تقدم.",
 //       scrollArea: "منطقة التمرير",
 //       scrollAreaDesc: "يفصل المحتوى بصريًا أو دلاليًا.",
 //       tabs: "التبويبات",
@@ -85,8 +77,8 @@
 //       backlog: "قائمة الانتظار",
 //       toDo: "المهام",
 //       done: "منجز",
-//       docs: "الوثائق",
-//     },
+//       docs: "الوثائق"
+//     }
 //   },
 //   he: {
 //     dir: "rtl",
@@ -102,16 +94,13 @@
 //       alertDialog: "דיאלוג התראה",
 //       alertDialogDesc: "דיאלוג מודאלי שמפריע למשתמש עם תוכן חשוב ומצפה לתגובה.",
 //       hoverCard: "כרטיס ריחוף",
-//       hoverCardDesc:
-//         "למשתמשים רואים כדי להציג תצוגה מקדימה של תוכן זמין מאחורי קישור.",
+//       hoverCardDesc: "למשתמשים רואים כדי להציג תצוגה מקדימה של תוכן זמין מאחורי קישור.",
 //       progress: "התקדמות",
-//       progressDesc:
-//         "מציג אינדיקטור המציג את התקדמות ההשלמה של משימה, בדרך כלל מוצג כסרגל התקדמות.",
+//       progressDesc: "מציג אינדיקטור המציג את התקדמות ההשלמה של משימה, בדרך כלל מוצג כסרגל התקדמות.",
 //       scrollArea: "אזור גלילה",
 //       scrollAreaDesc: "מפריד תוכן חזותית או סמנטית.",
 //       tabs: "כרטיסיות",
-//       tabsDesc:
-//         "קבוצה של חלקי תוכן מרובדים—המכונים לוחות כרטיסיות—המוצגים אחד בכל פעם.",
+//       tabsDesc: "קבוצה של חלקי תוכן מרובדים—המכונים לוחות כרטיסיות—המוצגים אחד בכל פעם.",
 //       tooltip: "טולטיפ",
 //       tooltipDesc:
 //         "חלון קופץ המציג מידע הקשור לאלמנט כאשר האלמנט מקבל מיקוד מקלדת או כאשר העכבר מרחף מעליו.",
@@ -119,42 +108,42 @@
 //       backlog: "רשימת המתנה",
 //       toDo: "לעשות",
 //       done: "הושלם",
-//       docs: "תיעוד",
-//     },
-//   },
+//       docs: "תיעוד"
+//     }
+//   }
 // }
 
 // const components = [
 //   {
 //     titleKey: "alertDialog" as const,
 //     descriptionKey: "alertDialogDesc" as const,
-//     href: "/docs/primitives/alert-dialog",
+//     href: "/docs/primitives/alert-dialog"
 //   },
 //   {
 //     titleKey: "hoverCard" as const,
 //     descriptionKey: "hoverCardDesc" as const,
-//     href: "/docs/primitives/hover-card",
+//     href: "/docs/primitives/hover-card"
 //   },
 //   {
 //     titleKey: "progress" as const,
 //     descriptionKey: "progressDesc" as const,
-//     href: "/docs/primitives/progress",
+//     href: "/docs/primitives/progress"
 //   },
 //   {
 //     titleKey: "scrollArea" as const,
 //     descriptionKey: "scrollAreaDesc" as const,
-//     href: "/docs/primitives/scroll-area",
+//     href: "/docs/primitives/scroll-area"
 //   },
 //   {
 //     titleKey: "tabs" as const,
 //     descriptionKey: "tabsDesc" as const,
-//     href: "/docs/primitives/tabs",
+//     href: "/docs/primitives/tabs"
 //   },
 //   {
 //     titleKey: "tooltip" as const,
 //     descriptionKey: "tooltipDesc" as const,
-//     href: "/docs/primitives/tooltip",
-//   },
+//     href: "/docs/primitives/tooltip"
+//   }
 // ] as const
 
 // export default function NavigationMenuRtl() {
@@ -164,10 +153,7 @@
 //     <NavigationMenu dir={dir} placement={dir === "rtl" ? "bottom-end" : "bottom-start"}>
 //       <NavigationMenuItem>
 //         <NavigationMenuTrigger>{t.gettingStarted}</NavigationMenuTrigger>
-//         <NavigationMenuContent
-//           dir={dir}
-//           data-lang={dir === "rtl" ? language : undefined}
-//         >
+//         <NavigationMenuContent data-lang={dir === "rtl" ? language : undefined} dir={dir}>
 //           <ul class="w-96">
 //             <ListItem href="/docs/components" title={t.introduction}>
 //               {t.introductionDesc}
@@ -183,17 +169,14 @@
 //       </NavigationMenuItem>
 //       <NavigationMenuItem class="hidden md:flex">
 //         <NavigationMenuTrigger>{t.components}</NavigationMenuTrigger>
-//         <NavigationMenuContent
-//           dir={dir}
-//           data-lang={dir === "rtl" ? language : undefined}
-//         >
+//         <NavigationMenuContent data-lang={dir === "rtl" ? language : undefined} dir={dir}>
 //           <ul class="grid w-[400px] gap-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
 //             <For each={components}>
 //               {(component) => (
 //                 <ListItem
+//                   href={component.href}
 //                   id={component.titleKey}
 //                   title={t[component.titleKey]}
-//                   href={component.href}
 //                 >
 //                   {t[component.descriptionKey]}
 //                 </ListItem>
@@ -204,33 +187,47 @@
 //       </NavigationMenuItem>
 //       <NavigationMenuItem>
 //         <NavigationMenuTrigger>{t.withIcon}</NavigationMenuTrigger>
-//         <NavigationMenuContent
-//           dir={dir}
-//           data-lang={dir === "rtl" ? language : undefined}
-//         >
+//         <NavigationMenuContent data-lang={dir === "rtl" ? language : undefined} dir={dir}>
 //           <ul class="grid w-[200px]">
 //             <li>
-//               <NavigationMenuLink as={"a"} href="#" class="flex-row items-center gap-2"><CircleAlertIcon />{t.backlog}</NavigationMenuLink>
-//               <NavigationMenuLink as={"a"} href="#" class="flex-row items-center gap-2"><CircleDashedIcon />{t.toDo}</NavigationMenuLink>
-//               <NavigationMenuLink as={"a"} href="#" class="flex-row items-center gap-2"><CircleCheckIcon />{t.done}</NavigationMenuLink>
+//               <NavigationMenuLink as={"a"} class="flex-row items-center gap-2" href="#">
+//                 <CircleAlertIcon />
+//                 {t.backlog}
+//               </NavigationMenuLink>
+//               <NavigationMenuLink as={"a"} class="flex-row items-center gap-2" href="#">
+//                 <CircleDashedIcon />
+//                 {t.toDo}
+//               </NavigationMenuLink>
+//               <NavigationMenuLink as={"a"} class="flex-row items-center gap-2" href="#">
+//                 <CircleCheckIcon />
+//                 {t.done}
+//               </NavigationMenuLink>
 //             </li>
 //           </ul>
 //         </NavigationMenuContent>
 //       </NavigationMenuItem>
 //       <NavigationMenuItem>
-//         <NavigationMenuLink class={navigationMenuTriggerStyle()} data-lang={dir === "rtl" ? language : undefined} as={"a"} href="/docs/components">{t.docs}</NavigationMenuLink>
+//         <NavigationMenuLink
+//           as={"a"}
+//           class={navigationMenuTriggerStyle()}
+//           data-lang={dir === "rtl" ? language : undefined}
+//           href="/docs/components"
+//         >
+//           {t.docs}
+//         </NavigationMenuLink>
 //       </NavigationMenuItem>
 //     </NavigationMenu>
 //   )
 // }
 
-// function ListItem(rawProps: ComponentProps<"li"> & { href: string }) {
-//   const [local, others] = splitProps(rawProps, ["href", "title", "children"])
+// function ListItem(props: ComponentProps<"li"> & { href: string }) {
+//   const others = omit(props, "href", "title", "children")
 //   return (
 //     <li {...others}>
-//       <NavigationMenuLink as={"a"} href={local.href}><div class="flex flex-col gap-1 text-sm">
-//           <div class="leading-none font-medium">{local.title}</div>
-//           <div class="line-clamp-2 text-muted-foreground">{local.children}</div>
+//       <NavigationMenuLink as={"a"} href={props.href}>
+//         <div class="flex flex-col gap-1 text-sm">
+//           <div class="font-medium leading-none">{props.title}</div>
+//           <div class="line-clamp-2 text-muted-foreground">{props.children}</div>
 //         </div>
 //       </NavigationMenuLink>
 //     </li>

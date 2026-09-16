@@ -1,6 +1,6 @@
-import type { Component, ComponentProps, JSX, ValidComponent } from "solid-js"
-import { splitProps } from "solid-js"
-import type { Portal } from "solid-js/web"
+import type { Component } from "solid-js"
+import { omit } from "solid-js"
+import type { ComponentProps, JSX, Portal, ValidComponent } from "@solidjs/web"
 
 import type {
   ContentProps,
@@ -35,13 +35,13 @@ type DrawerOverlayProps<T extends ValidComponent = "div"> = OverlayProps<T> & { 
 const DrawerOverlay = <T extends ValidComponent = "div">(
   props: DynamicProps<T, DrawerOverlayProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DrawerOverlayProps, ["class"])
+  const others = omit(props as DrawerOverlayProps, "class")
   const drawerContext = DrawerPrimitive.useContext()
   return (
     <DrawerPrimitive.Overlay
       class={cn(
         "cn-drawer-overlay data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=open]:animate-in",
-        local.class
+        props.class
       )}
       data-slot="drawer-overlay"
       style={{
@@ -60,7 +60,7 @@ type DrawerContentProps<T extends ValidComponent = "div"> = ContentProps<T> & {
 const DrawerContent = <T extends ValidComponent = "div">(
   props: DynamicProps<T, DrawerContentProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DrawerContentProps, ["class", "children"])
+  const others = omit(props as DrawerContentProps, "class", "children")
   return (
     <DrawerPortal>
       <DrawerOverlay />
@@ -71,23 +71,23 @@ const DrawerContent = <T extends ValidComponent = "div">(
           "data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:mt-24 data-[side=bottom]:max-h-[80vh] data-[side=bottom]:rounded-t-lg data-[side=bottom]:border-t data-[side=bottom]:after:inset-x-0 data-[side=bottom]:after:top-full data-[side=bottom]:after:h-1/2",
           "data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=right]:after:inset-y-0 data-[side=right]:after:left-full data-[side=right]:after:w-1/2 data-[side=right]:sm:max-w-sm",
           "data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=left]:before:inset-y-0 data-[side=left]:before:right-full data-[side=left]:before:w-1/2 data-[side=left]:sm:max-w-sm",
-          local.class
+          props.class
         )}
         data-slot="drawer-content"
         {...others}
       >
         <div class="mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full bg-muted group-data-[side=bottom]/drawer-content:block" />
-        {local.children}
+        {props.children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
   )
 }
 
 const DrawerHeader: Component<ComponentProps<"div">> = (props) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-drawer-header flex flex-col gap-1.5 p-4", local.class)}
+      class={cn("cn-drawer-header flex flex-col gap-1.5 p-4", props.class)}
       data-slot="drawer-header"
       {...others}
     />
@@ -95,10 +95,10 @@ const DrawerHeader: Component<ComponentProps<"div">> = (props) => {
 }
 
 const DrawerFooter: Component<ComponentProps<"div">> = (props) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
-      class={cn("cn-drawer-footer mt-auto flex flex-col gap-2 p-4", local.class)}
+      class={cn("cn-drawer-footer mt-auto flex flex-col gap-2 p-4", props.class)}
       data-slot="drawer-footer"
       {...others}
     />
@@ -110,10 +110,10 @@ type DrawerTitleProps<T extends ValidComponent = "div"> = LabelProps<T> & { clas
 const DrawerTitle = <T extends ValidComponent = "div">(
   props: DynamicProps<T, DrawerTitleProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DrawerTitleProps<T>, ["class"])
+  const others = omit(props as DrawerTitleProps<T>, "class")
   return (
     <DrawerPrimitive.Label
-      class={cn("cn-drawer-title font-semibold text-foreground", local.class)}
+      class={cn("cn-drawer-title font-semibold text-foreground", props.class)}
       data-slot="drawer-title"
       {...others}
     />
@@ -127,10 +127,10 @@ type DrawerDescriptionProps<T extends ValidComponent = "div"> = DescriptionProps
 const DrawerDescription = <T extends ValidComponent = "div">(
   props: DynamicProps<T, DrawerDescriptionProps<T>>
 ) => {
-  const [local, others] = splitProps(props as DrawerDescriptionProps<T>, ["class"])
+  const others = omit(props as DrawerDescriptionProps<T>, "class")
   return (
     <DrawerPrimitive.Description
-      class={cn("cn-drawer-description text-muted-foreground text-sm", local.class)}
+      class={cn("cn-drawer-description text-muted-foreground text-sm", props.class)}
       data-slot="drawer-description"
       {...others}
     />

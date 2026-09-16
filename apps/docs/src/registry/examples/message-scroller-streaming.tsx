@@ -95,7 +95,7 @@ export default function MessageScrollerStreaming() {
             >
               <MessageScroller>
                 <MessageScrollerViewport>
-                  <MessageScrollerContent aria-busy={chat.isBusy()} class="p-6">
+                  <MessageScrollerContent aria-busy={chat.isBusy() && "true"} class="p-6">
                     <For each={chat.messages}>
                       {(message) => (
                         <MessageAnimated message={message} scrollAnchor={message.role === "user"} />

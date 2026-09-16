@@ -5,7 +5,7 @@ export default function InputInvalid() {
   return (
     <Field data-invalid>
       <FieldLabel for="input-invalid">Invalid Input</FieldLabel>
-      <Input aria-invalid id="input-invalid" placeholder="Error" />
+      <Input aria-invalid="true" id="input-invalid" placeholder="Error" />
       <FieldDescription>This field contains validation errors.</FieldDescription>
     </Field>
   )

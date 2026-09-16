@@ -1,4 +1,5 @@
-import { type ComponentProps, mergeProps, splitProps } from "solid-js"
+import { merge, omit } from "solid-js"
+import type { ComponentProps } from "@solidjs/web"
 
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -10,12 +11,12 @@ import { Textarea } from "~/registry/ui/textarea"
 type InputGroupProps = ComponentProps<"div">
 
 const InputGroup = (props: InputGroupProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <div
       class={cn(
         "group/input-group cn-input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto",
-        local.class
+        props.class
       )}
       data-slot="input-group"
       role="group"
@@ -44,13 +45,13 @@ const inputGroupAddonVariants = cva(
 type InputGroupAddonProps = ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>
 
 const InputGroupAddon = (rawProps: InputGroupAddonProps) => {
-  const props = mergeProps({ align: "inline-start" } as const, rawProps)
-  const [local, others] = splitProps(props, ["class", "align"])
+  const props = merge({ align: "inline-start" } as const, rawProps)
+  const others = omit(props, "class", "align")
 
   return (
     <div
-      class={cn(inputGroupAddonVariants({ align: local.align }), local.class)}
-      data-align={local.align}
+      class={cn(inputGroupAddonVariants({ align: props.align }), props.class)}
+      data-align={props.align}
       data-slot="input-group-addon"
       onClick={(event) => {
         if ((event.target as HTMLElement).closest("button")) {
@@ -84,15 +85,15 @@ type InputGroupButtonProps = Omit<ButtonProps, "size" | "type"> &
   }
 
 const InputGroupButton = (rawProps: InputGroupButtonProps) => {
-  const props = mergeProps({ type: "button", variant: "ghost", size: "xs" } as const, rawProps)
-  const [local, others] = splitProps(props, ["class", "type", "variant", "size"])
+  const props = merge({ type: "button", variant: "ghost", size: "xs" } as const, rawProps)
+  const others = omit(props, "class", "type", "variant", "size")
 
   return (
     <Button
-      class={cn(inputGroupButtonVariants({ size: local.size }), local.class)}
-      data-size={local.size}
-      type={local.type}
-      variant={local.variant}
+      class={cn(inputGroupButtonVariants({ size: props.size }), props.class)}
+      data-size={props.size}
+      type={props.type}
+      variant={props.variant}
       {...others}
     />
   )
@@ -101,10 +102,10 @@ const InputGroupButton = (rawProps: InputGroupButtonProps) => {
 type InputGroupTextProps = ComponentProps<"span">
 
 const InputGroupText = (props: InputGroupTextProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <span
-      class={cn("cn-input-group-text flex items-center [&_svg]:pointer-events-none", local.class)}
+      class={cn("cn-input-group-text flex items-center [&_svg]:pointer-events-none", props.class)}
       {...others}
     />
   )
@@ -113,10 +114,10 @@ const InputGroupText = (props: InputGroupTextProps) => {
 type InputGroupInputProps = InputProps
 
 const InputGroupInput = (props: InputGroupInputProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <Input
-      class={cn("cn-input-group-input flex-1", local.class)}
+      class={cn("cn-input-group-input flex-1", props.class)}
       data-slot="input-group-control"
       {...others}
     />
@@ -126,10 +127,10 @@ const InputGroupInput = (props: InputGroupInputProps) => {
 type InputGroupTextareaProps = ComponentProps<"textarea">
 
 const InputGroupTextarea = (props: InputGroupTextareaProps) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
   return (
     <Textarea
-      class={cn("cn-input-group-textarea flex-1 resize-none", local.class)}
+      class={cn("cn-input-group-textarea flex-1 resize-none", props.class)}
       data-slot="input-group-control"
       {...others}
     />

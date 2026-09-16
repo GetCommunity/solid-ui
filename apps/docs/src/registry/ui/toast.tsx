@@ -1,4 +1,5 @@
-import type { Component, ComponentProps, JSX } from "solid-js"
+import type { Component } from "solid-js"
+import type { ComponentProps, JSX } from "@solidjs/web"
 
 import { CircleCheck, Info, LoaderCircle, OctagonX, TriangleAlert } from "lucide-solid"
 import { Toaster as Sonner } from "solid-sonner"

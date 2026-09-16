@@ -1,4 +1,5 @@
-import { For, type JSX, lazy, Match, Show, Suspense, Switch } from "solid-js"
+import { createMemo, For, Loading, lazy, Match, Show, Switch } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { useDesignSystem } from "~/components/design-system-provider"
 import { LockButton } from "~/components/lock-button"
@@ -13,17 +14,9 @@ import {
 } from "~/components/picker"
 import { type IconLibraryName, iconLibraries } from "~/registry/icon-libraries"
 
-const IconLucide = lazy(() =>
-  import("~/registry/icons/icon-lucide").then((mod) => ({
-    default: mod.IconLucide
-  }))
-)
+const IconLucide = lazy(() => import("~/registry/icons/icon-lucide"), { export: "IconLucide" })
 
-const IconTabler = lazy(() =>
-  import("~/registry/icons/icon-tabler").then((mod) => ({
-    default: mod.IconTabler
-  }))
-)
+const IconTabler = lazy(() => import("~/registry/icons/icon-tabler"), { export: "IconTabler" })
 
 const PREVIEW_ICONS: Record<IconLibraryName, string[]> = {
   lucide: [
@@ -146,20 +139,20 @@ export function IconLibraryPicker() {
 }
 
 function IconLibraryPreview(props: { iconLibrary: IconLibraryName }) {
-  const previewIcons = PREVIEW_ICONS[props.iconLibrary]
+  const previewIcons = createMemo(() => PREVIEW_ICONS[props.iconLibrary])
 
   return (
-    <Suspense
+    <Loading
       fallback={
         <div class="-mx-1 grid w-full grid-cols-7 gap-2">
-          <For each={previewIcons}>
+          <For each={previewIcons()}>
             {() => <div class="size-5 animate-pulse rounded bg-muted" />}
           </For>
         </div>
       }
     >
       <div class="-mx-1 grid w-full grid-cols-7 gap-2">
-        <For each={previewIcons}>
+        <For each={previewIcons()}>
           {(iconName) => (
             <div class="flex size-5 items-center justify-center *:[svg]:size-4">
               <Switch>
@@ -174,6 +167,6 @@ function IconLibraryPreview(props: { iconLibrary: IconLibraryName }) {
           )}
         </For>
       </div>
-    </Suspense>
+    </Loading>
   )
 }

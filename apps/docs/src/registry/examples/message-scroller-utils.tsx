@@ -1,5 +1,4 @@
-import { type ComponentProps, createSignal, For, onCleanup } from "solid-js"
-import { createStore, produce, reconcile } from "solid-js/store"
+import { type ComponentProps, createSignal, createStore, For, onCleanup, untrack } from "solid-js"
 
 import { Bubble, BubbleContent } from "~/registry/ui/bubble"
 import { Message, MessageContent } from "~/registry/ui/message"
@@ -110,17 +109,18 @@ function createScriptedChat(options: ScriptedChatOptions) {
     const chunks = answer.text.match(/\S+\s*/g) ?? [answer.text]
     let chunkIndex = 0
 
-    setMessages(produce((current) => current.push({ ...answer, text: "" })))
+    setMessages((current) => {
+      current.push({ ...answer, text: "" })
+    })
     setStatus("streaming")
 
     streamTimer = setInterval(() => {
       const chunk = chunks[chunkIndex]
       if (chunk) {
-        setMessages(
-          (message) => message.id === answer.id,
-          "text",
-          (text) => `${text}${chunk}`
-        )
+        setMessages((current) => {
+          const message = current.find((candidate) => candidate.id === answer.id)
+          if (message) message.text += chunk
+        })
         chunkIndex += 1
       }
 
@@ -136,7 +136,9 @@ function createScriptedChat(options: ScriptedChatOptions) {
     if (!question || isBusy()) return
 
     const answer = options.script.messages[messages.length + 1]
-    setMessages(produce((current) => current.push({ ...question })))
+    setMessages((current) => {
+      current.push({ ...question })
+    })
     setStatus("submitted")
 
     thinkingTimer = setTimeout(() => {
@@ -147,7 +149,9 @@ function createScriptedChat(options: ScriptedChatOptions) {
 
   const reset = () => {
     clearTimers()
-    setMessages(reconcile(options.script.get(initialCount)))
+    setMessages((current) => {
+      current.splice(0, current.length, ...options.script.get(initialCount))
+    })
     setStatus("ready")
   }
 
@@ -244,10 +248,11 @@ function MessageAnimated(props: MessageAnimatedProps) {
   // Only user turns animate in; an assistant turn is already streaming its own
   // text. Read once at creation so changing the preset later cannot re-trigger
   // the entry animation on rows that are already on screen.
-  const enterClass =
+  const enterClass = untrack(() =>
     props.message.role === "user"
       ? (props.animationPreset ?? MESSAGE_ANIMATIONS["slide-up"]).class
       : undefined
+  )
   const paragraphs = () => splitParagraphs(props.message.text)
 
   return (

@@ -1,14 +1,14 @@
-import type { JSX } from "solid-js"
 import {
   children,
   createContext,
   createEffect,
-  mergeProps,
+  merge,
+  omit,
   onCleanup,
-  onMount,
-  splitProps,
+  onSettled,
   useContext
 } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import { ArrowDown } from "lucide-solid"
 
@@ -40,7 +40,7 @@ function useMessageScrollerContext() {
   const context = useContext(MessageScrollerContext)
 
   if (!context) {
-    throw new Error("MessageScroller parts must be used within MessageScroller.Provider.")
+    throw new Error("MessageScroller parts must be used within MessageScroller.")
   }
 
   return context
@@ -82,7 +82,7 @@ function useMessageScrollerVisibility(): MessageScrollerVisibilityState {
 }
 
 const MessageScrollerProvider = (rawProps: MessageScrollerProviderProps) => {
-  const props = mergeProps(
+  const props = merge(
     {
       autoScroll: false,
       defaultScrollPosition: "end" as const,
@@ -94,16 +94,12 @@ const MessageScrollerProvider = (rawProps: MessageScrollerProviderProps) => {
   )
   const context = createMessageScrollerController(props)
 
-  return (
-    <MessageScrollerContext.Provider value={context}>
-      {props.children}
-    </MessageScrollerContext.Provider>
-  )
+  return <MessageScrollerContext value={context}>{props.children}</MessageScrollerContext>
 }
 
 const MessageScroller = (props: MessageScrollerProps) => {
   const context = useMessageScrollerContext()
-  const [local, others] = splitProps(props, ["class", "ref"])
+  const others = omit(props, "class", "ref")
   let rootElement: HTMLDivElement | undefined
 
   onCleanup(() => {
@@ -114,13 +110,13 @@ const MessageScroller = (props: MessageScrollerProps) => {
     <div
       class={cn(
         "cn-message-scroller group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden",
-        local.class
+        props.class
       )}
       data-slot="message-scroller"
       ref={(element) => {
         rootElement = element
         context.setRootElement(element)
-        setElementRef(local.ref, element)
+        setElementRef(props.ref, element)
       }}
       {...others}
     />
@@ -128,9 +124,10 @@ const MessageScroller = (props: MessageScrollerProps) => {
 }
 
 const MessageScrollerViewport = (rawProps: MessageScrollerViewportProps) => {
-  const props = mergeProps({ preserveScrollOnPrepend: true }, rawProps)
+  const props = merge({ preserveScrollOnPrepend: true }, rawProps)
   const context = useMessageScrollerContext()
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "aria-label",
     "children",
     "class",
@@ -141,13 +138,16 @@ const MessageScrollerViewport = (rawProps: MessageScrollerViewportProps) => {
     "preserveScrollOnPrepend",
     "ref",
     "role",
-    "tabIndex"
-  ])
+    "tabindex"
+  )
   let viewportElement: HTMLDivElement | undefined
 
-  createEffect(() => context.setPreserveScrollOnPrepend(local.preserveScrollOnPrepend))
+  createEffect(
+    () => context,
+    (c) => c.setPreserveScrollOnPrepend(props.preserveScrollOnPrepend)
+  )
 
-  onMount(() => {
+  onSettled(() => {
     if (!viewportElement || typeof ResizeObserver === "undefined") return
 
     // Coalesce into rAF: handleResize mutates the spacer inside the observed
@@ -173,56 +173,49 @@ const MessageScrollerViewport = (rawProps: MessageScrollerViewportProps) => {
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useAriaPropsSupportedByRole: the labelled native scroll viewport needs scroll-intent handlers and receives a region role by default
     <div
-      aria-label={local["aria-label"] ?? "Messages"}
+      aria-label={props["aria-label"] ?? "Messages"}
       class={cn(
         "cn-message-scroller-viewport scroll-fade-b scrollbar-thin scrollbar-gutter-stable data-autoscrolling:scrollbar-thumb-transparent data-autoscrolling:scrollbar-track-transparent size-full min-h-0 min-w-0 overflow-y-auto overscroll-contain contain-content",
-        local.class
+        props.class
       )}
       data-slot="message-scroller-viewport"
       onKeyDown={(event) => {
         if (USER_SCROLL_KEYS.has(event.key)) context.userScrollIntent()
-        callEventHandler(local.onKeyDown, event)
+        callEventHandler(props.onKeyDown, event)
       }}
       onScroll={(event) => {
         context.syncAfterScroll()
-        callEventHandler(local.onScroll, event)
+        callEventHandler(props.onScroll, event)
       }}
       onTouchMove={(event) => {
         context.userScrollIntent()
-        callEventHandler(local.onTouchMove, event)
+        callEventHandler(props.onTouchMove, event)
       }}
       onWheel={(event) => {
         context.userScrollIntent()
-        callEventHandler(local.onWheel, event)
+        callEventHandler(props.onWheel, event)
       }}
       ref={(element) => {
         viewportElement = element
         context.setViewportElement(element)
-        setElementRef(local.ref, element)
+        setElementRef(props.ref, element)
       }}
-      role={local.role ?? "region"}
-      tabIndex={local.tabIndex ?? 0}
+      role={props.role ?? "region"}
+      tabindex={props.tabindex ?? 0}
       {...others}
     >
-      {local.children}
+      {props.children}
     </div>
   )
 }
 
 const MessageScrollerContent = (props: MessageScrollerContentProps) => {
   const context = useMessageScrollerContext()
-  const [local, others] = splitProps(props, [
-    "aria-relevant",
-    "children",
-    "class",
-    "ref",
-    "role",
-    "spacerClassName"
-  ])
+  const others = omit(props, "aria-relevant", "children", "class", "ref", "role", "spacerClassName")
   let contentElement: HTMLDivElement | undefined
   let spacerElement: HTMLDivElement | undefined
 
-  onMount(() => {
+  onSettled(() => {
     if (!contentElement) return
 
     context.handleContentChange()
@@ -260,21 +253,21 @@ const MessageScrollerContent = (props: MessageScrollerContentProps) => {
 
   return (
     <div
-      aria-relevant={local["aria-relevant"] ?? "additions"}
-      class={cn("cn-message-scroller-content flex h-max min-h-full flex-col", local.class)}
+      aria-relevant={props["aria-relevant"] ?? "additions"}
+      class={cn("cn-message-scroller-content flex h-max min-h-full flex-col", props.class)}
       data-slot="message-scroller-content"
       ref={(element) => {
         contentElement = element
         context.setContentElement(element)
-        setElementRef(local.ref, element)
+        setElementRef(props.ref, element)
       }}
-      role={local.role ?? "log"}
+      role={props.role ?? "log"}
       {...others}
     >
-      {local.children}
+      {props.children}
       <div
         aria-hidden="true"
-        class={local.spacerClassName}
+        class={props.spacerClassName}
         data-message-scroller-spacer=""
         hidden
         ref={(element) => {
@@ -287,13 +280,13 @@ const MessageScrollerContent = (props: MessageScrollerContentProps) => {
 }
 
 const MessageScrollerItem = (rawProps: MessageScrollerItemProps) => {
-  const props = mergeProps({ scrollAnchor: false }, rawProps)
+  const props = merge({ scrollAnchor: false }, rawProps)
   const context = useMessageScrollerContext()
-  const [local, others] = splitProps(props, ["class", "messageId", "ref", "scrollAnchor"])
+  const others = omit(props, "class", "messageId", "ref", "scrollAnchor")
   let itemElement: HTMLDivElement | undefined
 
   createEffect(() => {
-    const messageId = local.messageId
+    const messageId = props.messageId
     if (!messageId || !itemElement) return
 
     context.registerMessage(messageId, itemElement)
@@ -304,14 +297,14 @@ const MessageScrollerItem = (rawProps: MessageScrollerItemProps) => {
     <div
       class={cn(
         "cn-message-scroller-item min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto]",
-        local.class
+        props.class
       )}
-      data-message-id={local.messageId}
-      data-scroll-anchor={local.scrollAnchor ? "true" : "false"}
+      data-message-id={props.messageId}
+      data-scroll-anchor={props.scrollAnchor ? "true" : "false"}
       data-slot="message-scroller-item"
       ref={(element) => {
         itemElement = element
-        setElementRef(local.ref, element)
+        setElementRef(props.ref, element)
       }}
       {...others}
     />
@@ -319,7 +312,7 @@ const MessageScrollerItem = (rawProps: MessageScrollerItemProps) => {
 }
 
 const MessageScrollerButton = (rawProps: MessageScrollerButtonProps) => {
-  const props = mergeProps(
+  const props = merge(
     {
       behavior: "smooth" as const,
       direction: "end" as const,
@@ -330,7 +323,8 @@ const MessageScrollerButton = (rawProps: MessageScrollerButtonProps) => {
     rawProps
   )
   const context = useMessageScrollerContext()
-  const [local, others] = splitProps(props, [
+  const others = omit(
+    props,
     "behavior",
     "children",
     "class",
@@ -339,42 +333,42 @@ const MessageScrollerButton = (rawProps: MessageScrollerButtonProps) => {
     "onClick",
     "render",
     "size",
-    "tabIndex",
+    "tabindex",
     "type",
     "variant"
-  ])
+  )
   const isActive = () => {
     const state = context.scrollable()
-    return local.direction === "start" ? state.start : state.end
+    return props.direction === "start" ? state.start : state.end
   }
-  const resolvedChildren = children(() => local.children)
+  const resolvedChildren = children(() => props.children)
   const handleClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (event) => {
     if (!isActive()) return
 
-    callEventHandler(local.onClick, event)
+    callEventHandler(props.onClick, event)
     if (event.defaultPrevented) return
 
     event.currentTarget.blur()
-    if (local.direction === "start") context.scrollToStart({ behavior: local.behavior })
-    else context.scrollToEnd({ behavior: local.behavior })
+    if (props.direction === "start") context.scrollToStart({ behavior: props.behavior })
+    else context.scrollToEnd({ behavior: props.behavior })
   }
   const buttonClass = () =>
     cn(
-      "cn-message-scroller-button absolute inset-s-1/2 -translate-x-1/2 border-border bg-background text-foreground transition-[translate,scale,opacity] duration-200 hover:bg-muted hover:text-foreground data-[direction=end]:data-[active=false]:translate-y-full data-[direction=start]:data-[active=false]:-translate-y-full data-[active=false]:pointer-events-none data-[direction=start]:top-4 data-[direction=end]:right-4 data-[direction=end]:bottom-4 data-[active=true]:translate-y-0 data-[active=false]:scale-95 data-[active=true]:scale-100 data-[active=false]:opacity-0 data-[active=true]:opacity-100 data-[active=false]:duration-400 data-[active=false]:ease-[cubic-bezier(0.7,0,0.84,0)] data-[active=true]:ease-[cubic-bezier(0.23,1,0.32,1)] rtl:translate-x-1/2 data-[direction=start]:[&_svg]:rotate-180",
-      local.class
+      "cn-message-scroller-button -translate-x-1/2 data-[direction=start]:data-[active=false]:-translate-y-full absolute inset-s-1/2 border-border bg-background text-foreground transition-[translate,scale,opacity] duration-200 hover:bg-muted hover:text-foreground data-[direction=end]:data-[active=false]:translate-y-full data-[active=false]:pointer-events-none data-[direction=start]:top-4 data-[direction=end]:right-4 data-[direction=end]:bottom-4 data-[active=true]:translate-y-0 data-[active=false]:scale-95 data-[active=true]:scale-100 data-[active=false]:opacity-0 data-[active=true]:opacity-100 data-[active=false]:duration-400 data-[active=false]:ease-[cubic-bezier(0.7,0,0.84,0)] data-[active=true]:ease-[cubic-bezier(0.23,1,0.32,1)] rtl:translate-x-1/2 data-[direction=start]:[&_svg]:rotate-180",
+      props.class
     )
   const defaultChildren = () =>
     resolvedChildren() ?? (
       <>
         <ArrowDown />
         <span class="sr-only">
-          {local.direction === "end" ? "Scroll to end" : "Scroll to start"}
+          {props.direction === "end" ? "Scroll to end" : "Scroll to start"}
         </span>
       </>
     )
   // Reactive props handed to the render function; the upstream useRender
   // stateAttributesMapping collapses to literal data-active/data-direction.
-  const renderProps = mergeProps(others, {
+  const renderProps = merge(others, {
     get class() {
       return buttonClass()
     },
@@ -385,30 +379,30 @@ const MessageScrollerButton = (rawProps: MessageScrollerButtonProps) => {
       return isActive() ? "true" : "false"
     },
     get "data-direction"() {
-      return local.direction
+      return props.direction
     },
     get "data-size"() {
-      return local.size
+      return props.size
     },
     "data-slot": "message-scroller-button",
     get "data-variant"() {
-      return local.variant
+      return props.variant
     },
     get inert() {
-      return local.inert ?? !isActive()
+      return props.inert ?? !isActive()
     },
     onClick: handleClick,
     get size() {
-      return local.size
+      return props.size
     },
-    get tabIndex() {
-      return isActive() ? local.tabIndex : -1
+    get tabindex() {
+      return isActive() ? props.tabindex : -1
     },
     get type() {
-      return local.type
+      return props.type
     },
     get variant() {
-      return local.variant
+      return props.variant
     }
   }) as ButtonProps
   const renderState: MessageScrollerButtonRenderState = {
@@ -416,27 +410,27 @@ const MessageScrollerButton = (rawProps: MessageScrollerButtonProps) => {
       return isActive()
     },
     get direction() {
-      return local.direction
+      return props.direction
     }
   }
 
-  if (local.render) return <>{local.render(renderProps, renderState)}</>
+  if (props.render) return <>{props.render(renderProps, renderState)}</>
 
   return (
     <Button
       {...others}
       class={buttonClass()}
       data-active={isActive() ? "true" : "false"}
-      data-direction={local.direction}
-      data-size={local.size}
+      data-direction={props.direction}
+      data-size={props.size}
       data-slot="message-scroller-button"
-      data-variant={local.variant}
-      inert={local.inert ?? !isActive()}
+      data-variant={props.variant}
+      inert={props.inert ?? !isActive()}
       onClick={handleClick}
-      size={local.size}
-      tabIndex={isActive() ? local.tabIndex : -1}
-      type={local.type}
-      variant={local.variant}
+      size={props.size}
+      tabindex={isActive() ? props.tabindex : -1}
+      type={props.type}
+      variant={props.variant}
     >
       {defaultChildren()}
     </Button>

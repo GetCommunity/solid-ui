@@ -1,4 +1,5 @@
-import { type ComponentProps, mergeProps, splitProps, type ValidComponent } from "solid-js"
+import { merge, omit } from "solid-js"
+import type { ComponentProps, ValidComponent } from "@solidjs/web"
 
 import { Polymorphic, type PolymorphicProps } from "@kobalte/core/polymorphic"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -26,32 +27,32 @@ type MarkerProps<T extends ValidComponent = "div"> = ComponentProps<T> &
   }
 
 const Marker = <T extends ValidComponent = "div">(props: PolymorphicProps<T, MarkerProps<T>>) => {
-  const merged = mergeProps({ as: "div", variant: "default" }, props)
-  const [local, others] = splitProps(merged as MarkerProps, ["as", "class", "variant"])
+  const merged = merge({ as: "div", variant: "default" }, props)
+  const others = omit(merged as MarkerProps, "as", "class", "variant")
 
   return (
     <Polymorphic
-      as={local.as}
+      as={merged.as}
       class={cn(
         markerVariants({
-          variant: local.variant
+          variant: merged.variant
         }),
-        local.class
+        props.class
       )}
       data-slot="marker"
-      data-variant={local.variant}
+      data-variant={props.variant}
       {...others}
     />
   )
 }
 
 const MarkerIcon = (props: ComponentProps<"span">) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <span
       aria-hidden="true"
-      class={cn("size-4 shrink-0 [&_svg:not([class*='size-'])]:size-4", local.class)}
+      class={cn("size-4 shrink-0 [&_svg:not([class*='size-'])]:size-4", props.class)}
       data-slot="marker-icon"
       {...others}
     />
@@ -59,13 +60,13 @@ const MarkerIcon = (props: ComponentProps<"span">) => {
 }
 
 const MarkerContent = (props: ComponentProps<"span">) => {
-  const [local, others] = splitProps(props, ["class"])
+  const others = omit(props, "class")
 
   return (
     <span
       class={cn(
         "wrap-break-word min-w-0 group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
-        local.class
+        props.class
       )}
       data-slot="marker-content"
       {...others}
